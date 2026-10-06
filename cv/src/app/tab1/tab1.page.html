@@ -1,17 +1,42 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Perfil Profesional</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  
+  <ion-card>
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-avatar slot="start">
+        <img alt="Avatar" src="assets\fotocv.png" />
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ perfil.nombre }}</h2>
+        <p>{{ perfil.titulo }}</p>
+      </ion-label>
+    </ion-item>
+    
+    <ion-card-header>
+      <ion-card-subtitle>{{ perfil.institucion }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      {{ perfil.descripcion }}
+    </ion-card-content>
+  </ion-card>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <ion-card>
+    <ion-list lines="full">
+      @for (item of contacto; track item.valor) {
+        <ion-item>
+          <ion-icon [name]="item.icono" slot="start" color="secondary"></ion-icon>
+          <ion-label>
+            <h3>{{ item.tipo }}</h3>
+            <p>{{ item.valor }}</p>
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  </ion-card>
+
 </ion-content>

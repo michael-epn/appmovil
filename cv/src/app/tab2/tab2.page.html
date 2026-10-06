@@ -1,17 +1,66 @@
-<ion-header [translucent]="true">
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Conocimientos</ion-title>
+  </ion-toolbar>
   <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+    <ion-segment [value]="vistaActual" (ionChange)="cambiarVista($event)">
+      <ion-segment-button value="conocimientos">
+        <ion-label>Técnicos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="habilidades">
+        <ion-label>Habilidades</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  
+  @if (vistaActual === 'conocimientos') {
+    <ion-accordion-group value="soporte">
+      <ion-accordion value="soporte">
+        <ion-item slot="header" color="light">
+          <ion-label>Mesa de Servicio y Soporte TI</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <ion-list lines="full">
+            @for (item of soporteTI; track item) {
+              <ion-item>
+                <ion-label class="ion-text-wrap">{{ item }}</ion-label>
+              </ion-item>
+            }
+          </ion-list>
+        </div>
+      </ion-accordion>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+      <ion-accordion value="desarrollo">
+        <ion-item slot="header" color="light">
+          <ion-label>Conocimientos Tecnológicos</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <ion-list lines="none">
+            @for (tech of conocimientosTecnologicos; track tech.area) {
+              <ion-item>
+                <ion-label class="ion-text-wrap">
+                  <h3><strong>{{ tech.area }}</strong></h3>
+                  <p>{{ tech.items }}</p>
+                </ion-label>
+              </ion-item>
+            }
+          </ion-list>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  }
+
+  @if (vistaActual === 'habilidades') {
+    <div class="ion-text-center ion-margin-top">
+      @for (habilidad of habilidades; track habilidad) {
+        <ion-chip class="ion-margin">
+          <ion-label>{{ habilidad }}</ion-label>
+        </ion-chip>
+      }
+    </div>
+  }
+
 </ion-content>

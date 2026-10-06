@@ -1,17 +1,36 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Educación e Idiomas</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <h2 class="ion-padding-start">Educación</h2>
+  <ion-card>
+    <ion-item lines="full">
+      <ion-icon name="school-outline" slot="start" size="large"></ion-icon>
+      <ion-label>
+        <h2><strong>{{ educacion.carrera }}</strong></h2>
+        <p>{{ educacion.institucion }}</p>
+      </ion-label>
+    </ion-item>
+    <ion-card-header>
+      <ion-card-subtitle>{{ educacion.nivel }}</ion-card-subtitle>
+      <ion-card-title>{{ educacion.periodo }}</ion-card-title>
+    </ion-card-header>
+  </ion-card>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <h2 class="ion-padding-start ion-margin-top">Idiomas</h2>
+  <ion-card class="ion-padding">
+    <ion-item lines="none">
+      <ion-icon name="language-outline" slot="start"></ion-icon>
+      <ion-label>
+        <h3>{{ idioma.nombre }}</h3>
+        <p>{{ idioma.nivelTexto }}</p>
+      </ion-label>
+    </ion-item>
+    <div class="ion-padding-horizontal">
+      <ion-progress-bar [value]="idioma.nivelValor" color="success"></ion-progress-bar>
+    </div>
+  </ion-card>
 </ion-content>
