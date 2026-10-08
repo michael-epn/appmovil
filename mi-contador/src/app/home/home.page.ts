@@ -34,6 +34,7 @@ export class HomePage {
     this.contador5 = 0;
     
     this.indicePrimo = 0;
+    this.numeroPrimo = 0;
   }
 
   mostrarSiguientePrimo(): void {
