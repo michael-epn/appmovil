@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Mi Contador</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Mi Contador</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div id="container">
+    <div class="contador-grid">
+      <div class="tarjeta-multiplo">
+        <h2>Múltiplos de 2:</h2>
+        <h1>{{ contador1 }}</h1>
+        <ion-button color="primary" (click)="aumentarMultiplo2()">+2</ion-button>
+      </div>
+      <div class="tarjeta-multiplo">
+        <h2>Múltiplos de 3:</h2>
+        <h1>{{ contador2 }}</h1>
+        <ion-button color="tertiary" (click)="aumentarMultiplo3()">+3</ion-button>
+      </div>
+      <div class="tarjeta-multiplo">
+        <h2>Múltiplos de 5:</h2>
+        <h1>{{ contador3 }}</h1>
+        <ion-button color="medium" (click)="aumentarMultiplo5()">+5</ion-button>
+      </div>
+      <div class="tarjeta-multiplo">
+        <h2>Múltiplos de 7:</h2>
+        <h1>{{ contador4 }}</h1>
+        <ion-button color="dark" (click)="aumentarMultiplo7()">+7</ion-button>
+      </div>
+      <div class="tarjeta-multiplo">
+        <h2>Múltiplos de 10:</h2>
+        <h1>{{ contador5 }}</h1>
+        <ion-button color="danger" (click)="aumentarMultiplo10()">+10</ion-button>
+      </div>
+    </div>
+
+    <div class="seccion-primos">
+        <h2>Números Primos:</h2>
+        <h1 class="primo-destacado">{{ numeroPrimo }}</h1>
+        <ion-button color="secondary" (click)="mostrarSiguientePrimo()"> 
+          Mostrar siguiente
+        </ion-button>
+    </div>
+    <div class="reiniciar">
+      <ion-button size="large" color="warning" (click)="reiniciar()">
+        REINICIAR TODO
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

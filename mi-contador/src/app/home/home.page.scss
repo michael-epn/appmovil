@@ -1,0 +1,61 @@
+#container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.contador-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  max-width: 800px;
+  margin-bottom: 30px;
+}
+
+.tarjeta-multiplo {
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 140px;
+}
+
+.tarjeta-multiplo h2 {
+  font-size: 16px;
+  margin: 0 0 10px 0;
+}
+
+h1 {
+  font-size: 48px;
+  margin: 10px 0 20px 0;
+  font-weight: bold;
+}
+
+.reiniciar {
+  margin-bottom: 20px;
+  padding: 2rem;
+  display: block;
+}
+
+.divisor-seccion {
+  width: 80%;
+  border: 0;
+  border-top: 2px dashed #ccc;
+  margin: 40px 0;
+}
+
+.seccion-primos {
+  border-radius: 16px;
+  padding: 30px;
+  min-width: 250px;
+}
+
+.seccion-primos h2 {
+  font-size: 20px;
+  margin-top: 0;
+}
+
+.primo-destacado {
+  font-size: 64px;
+}
