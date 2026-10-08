@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Datos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-item>
+    <ion-input
+      label="Nombre"
+      labelPlacement="stacked"
+      placeholder="Escribe tu nombre"
+      [(ngModel)]="nombre">
+    </ion-input>
+    <ion-input
+      label="Apellido"
+      labelPlacement="stacked"
+      placeholder="Escribe tu apellido"
+      [(ngModel)]="apellido">
+    </ion-input>
+  </ion-item>
+
+  <div style="text-align: center; margin-top: 30px;">
+    <h2>Contador</h2>
+    <h1 style="font-size: 64px;">{{ contador }}</h1>
+
+    <ion-button
+      color="danger"
+      [disabled]="contador === 0"
+      (click)="disminuir()">
+      - Disminuir
+    </ion-button>
+
+    <ion-button (click)="aumentar()">
+      + Aumentar
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      color="medium"
+      (click)="reiniciar()">
+      Reiniciar
+    </ion-button>
+
+    <p role="alert">{{ mensaje }}</p>
+
+    <ion-button expand="block" (click)="enviar()">
+      Enviar al resumen
+    </ion-button>
+  </div>
+</ion-content>
