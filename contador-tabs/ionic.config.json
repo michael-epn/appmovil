@@ -1,0 +1,7 @@
+{
+  "name": "contador-tabs",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
