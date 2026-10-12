@@ -1,13 +1,29 @@
-import { Component } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import {
+  IonHeader, IonToolbar, IonTitle, IonContent,
+  IonButton, IonCard, IonCardHeader, IonCardTitle,
+  IonCardContent, IonList, IonItem, IonLabel
+} from '@ionic/angular';
+import { DatosService } from '../services/datos';
 
 @Component({
   selector: 'app-tab3',
   templateUrl: 'tab3.page.html',
   styleUrls: ['tab3.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, ExploreContainerComponent],
+  standalone: true,
+  imports: [
+    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonButton, IonCard, IonCardHeader, IonCardTitle,
+    IonCardContent, IonList, IonItem, IonLabel
+  ]
 })
 export class Tab3Page {
-  constructor() {}
+  datosService = inject(DatosService);
+  private router = inject(Router);
+
+  reiniciarCompra(): void {
+    this.datosService.reiniciar();
+    this.router.navigate(['/tabs/tab1']);
+  }
 }

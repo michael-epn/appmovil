@@ -1,17 +1,48 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Carrito de Compras</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  @if (datosService.productosEnCarrito().length === 0) {
+    <p class="ion-text-center">No hay productos seleccionados.</p>
+  } @else {
+    <ion-card>
+      <ion-grid>
+        <ion-row style="font-weight: bold; border-bottom: 2px solid #ccc;">
+          <ion-col size="5">Producto</ion-col>
+          <ion-col size="2">Cant</ion-col>
+          <ion-col size="2">P. Unit</ion-col>
+          <ion-col size="3" class="ion-text-end">Subtotal</ion-col>
+        </ion-row>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+        @for (item of datosService.productosEnCarrito(); track item.id) {
+          <ion-row style="border-bottom: 1px solid #eee; align-items: center;">
+            <ion-col size="5">{{ item.nombre }}</ion-col>
+            <ion-col size="2">{{ item.cantidad }}</ion-col>
+            <ion-col size="2">${{ item.precio.toFixed(2) }}</ion-col>
+            <ion-col size="3" class="ion-text-end">${{ (item.precio * item.cantidad).toFixed(2) }}</ion-col>
+          </ion-row>
+        }
+      </ion-grid>
+    </ion-card>
+
+    <h2 class="ion-text-end ion-padding-end">
+      <strong>TOTAL Final: ${{ datosService.totalFinal().toFixed(2) }}</strong>
+    </h2>
+
+    <ion-item class="ion-margin-top">
+      <ion-label position="floating">Ingrese su monto para pagar ($):</ion-label>
+      <ion-input 
+        type="number" 
+        [ngModel]="datosService.montoPago()" 
+        (ngModelChange)="datosService.montoPago.set(+$event)">
+      </ion-input>
+    </ion-item>
+
+    <ion-button expand="block" color="primary" class="ion-margin-top" (click)="pagar()">
+      Pagar
+    </ion-button>
+  }
 </ion-content>

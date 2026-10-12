@@ -1,17 +1,39 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Selección de Productos</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <ion-item>
+    <ion-label position="floating">Cédula del cliente</ion-label>
+    <ion-input 
+      type="text" 
+      [ngModel]="datosService.cedula()" 
+      (ngModelChange)="datosService.cedula.set($event)">
+    </ion-input>
+  </ion-item>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <ion-list class="ion-margin-top">
+    @for (item of datosService.productos(); track item.id) {
+      <ion-card>
+        <ion-card-content style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3><strong>{{ item.nombre }}</strong></h3>
+            <p>Precio: ${{ item.precio.toFixed(2) }}</p>
+          </div>
+          
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <ion-button size="small" fill="outline" (click)="datosService.decrementar(item.id)">-</ion-button>
+            <span style="font-weight: bold; min-width: 20px; text-align: center;">{{ item.cantidad }}</span>
+            <ion-button size="small" fill="outline" (click)="datosService.incrementar(item.id)">+</ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  </ion-list>
+
+  <ion-button expand="block" color="success" class="ion-margin-top" (click)="irAlCarrito()">
+    Agregar al Carrito
+  </ion-button>
 </ion-content>
