@@ -101,22 +101,16 @@ npm run build
 
 ## Ejecución local
 
-Para iniciar la aplicación en modo desarrollo:
+Para visualizar la aplicación en la web:
 
 ```bash
-npm start
+ionic serve
 ```
 
-Esto ejecuta Angular en modo desarrollo y normalmente queda disponible en:
+Esto ejecuta Angular y normalmente queda disponible en:
 
 ```text
-http://localhost:4200
-```
-
-Si prefieres hacerlo explícitamente con el CLI de Angular:
-
-```bash
-npx ng serve
+http://localhost:8100
 ```
 
 ## Scripts disponibles
