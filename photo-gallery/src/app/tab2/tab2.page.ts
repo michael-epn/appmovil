@@ -58,7 +58,6 @@ export class Tab2Page {
           icon: 'close',
           role: 'cancel',
           handler: () => {
-            // Nothing to do, action sheet is automatically closed
           },
         },
       ],
