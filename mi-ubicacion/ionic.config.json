@@ -1,5 +1,5 @@
 {
-  "name": "MiUbicacionApp",
+  "name": "ubicacion-simple",
   "integrations": {
     "capacitor": {}
   },
