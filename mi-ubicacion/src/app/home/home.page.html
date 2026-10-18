@@ -5,27 +5,40 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card *ngIf="latitude() !== null && longitude() !== null">
+  <ion-card>
     <ion-card-header>
       <ion-card-title>Coordenadas actuales</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><strong>Latitud:</strong> {{ latitude() }}</p>
-      <p><strong>Longitud:</strong> {{ longitude() }}</p>
+      <ng-container *ngIf="latitude() !== null && longitude() !== null; else sinCoordenadas">
+        <p><strong>Latitud:</strong> {{ latitude() }}</p>
+        <p><strong>Longitud:</strong> {{ longitude() }}</p>
+        <p>
+          <strong>Estado:</strong> 
+          <span [style.color]="session.isTracking() ? 'var(--ion-color-success)' : 'var(--ion-color-medium)'">
+            {{ session.isTracking() ? 'Seguimiento activo' : 'En espera' }}
+          </span>
+        </p>
+      </ng-container>
+      <ng-template #sinCoordenadas>
+        <p class="ion-text-muted">Presiona "Obtener ubicación" para consultar las coordenadas.</p>
+      </ng-template>
     </ion-card-content>
   </ion-card>
 
-  <p *ngIf="errorMsg()">{{ errorMsg() }}</p>
+  <ion-text color="danger" *ngIf="errorMsg()">
+    <p class="ion-padding-start" role="alert">{{ errorMsg() }}</p>
+  </ion-text>
 
-  <ion-button expand="block" (click)="obtenerUbicacionActual()">
+  <ion-button expand="block" fill="outline" (click)="obtenerUbicacionActual()" [disabled]="session.isTracking()">
     Obtener ubicación actual
   </ion-button>
 
-  <ion-button expand="block" (click)="iniciarSeguimiento()" [disabled]="watchId !== null">
+  <ion-button expand="block" (click)="iniciarSeguimiento()" [disabled]="session.isTracking()">
     Iniciar seguimiento
   </ion-button>
 
-  <ion-button expand="block" color="medium" (click)="detenerSeguimiento()" [disabled]="watchId === null">
+  <ion-button expand="block" color="medium" (click)="detenerSeguimiento()" [disabled]="!session.isTracking()">
     Detener seguimiento
   </ion-button>
 </ion-content>

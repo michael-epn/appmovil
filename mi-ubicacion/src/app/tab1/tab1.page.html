@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Ruta y ubicación</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Ruta del seguimiento</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ng-container *ngIf="session.origin() as origin; else sinRuta">
+        <p><strong>Origen:</strong> {{ origin.latitude }}, {{ origin.longitude }}</p>
+
+        <p *ngIf="session.destination() as destination; else rutaEnCurso">
+          <strong>Destino final:</strong> {{ destination.latitude }}, {{ destination.longitude }}
+        </p>
+        <ng-template #rutaEnCurso>
+          <p class="ion-text-warning"><strong>Destino:</strong> En curso (usando posición actual)</p>
+        </ng-template>
+
+        <ion-button *ngIf="routeUrl() as url" expand="block" fill="clear" [href]="url" target="_blank" rel="noopener noreferrer">
+          Abrir ruta en Google Maps
+        </ion-button>
+      </ng-container>
+      <ng-template #sinRuta>
+        <p class="ion-text-muted">Inicia un seguimiento en Ubicación para registrar la ruta.</p>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Ubicación actual</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ng-container *ngIf="session.currentLocation() as currentLocation; else sinUbicacion">
+        <p><strong>Coordenadas:</strong> {{ currentLocation.latitude }}, {{ currentLocation.longitude }}</p>
+        <ion-button *ngIf="currentLocationUrl() as url" expand="block" fill="clear" [href]="url" target="_blank" rel="noopener noreferrer">
+          Abrir ubicación actual en Google Maps
+        </ion-button>
+      </ng-container>
+      <ng-template #sinUbicacion>
+        <p class="ion-text-muted">Ubicación actual no disponible.</p>
+      </ng-template>
+
+      <ion-button expand="block" fill="outline" (click)="actualizarUbicacionActual()">
+        Actualizar ubicación actual
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-text color="danger" *ngIf="errorMsg()">
+    <p class="ion-padding-start" role="alert">{{ errorMsg() }}</p>
+  </ion-text>
+  <ion-text color="success" *ngIf="statusMsg()">
+    <p class="ion-padding-start" role="status">{{ statusMsg() }}</p>
+  </ion-text>
+
+  <ion-button expand="block" color="secondary" (click)="guardarArchivo()" [disabled]="!routeUrl() || !currentLocationUrl()">
+    Guardar enlaces en archivo TXT
+  </ion-button>
+</ion-content>

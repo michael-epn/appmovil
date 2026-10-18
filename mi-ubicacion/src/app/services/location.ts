@@ -3,11 +3,14 @@ import { Geolocation, PermissionStatus, Position } from '@capacitor/geolocation'
 
 @Injectable({ providedIn: 'root' })
 export class LocationService {
-  async ensurePermissions(): Promise<PermissionStatus> {
-    // Pide permisos si no están concedidos
-    const perm = await Geolocation.checkPermissions();
-    if (perm.location === 'granted' || perm.coarseLocation === 'granted') return perm;
-    return Geolocation.requestPermissions();
+  async ensurePermissions() {
+    const permissions = await Geolocation.checkPermissions();
+    if (permissions.location !== 'granted') {
+      const request = await Geolocation.requestPermissions();
+      if (request.location !== 'granted') {
+        throw new Error('Permisos de ubicación denegados en el dispositivo');
+      }
+    }
   }
 
   async getCurrentPosition(): Promise<Position> {
