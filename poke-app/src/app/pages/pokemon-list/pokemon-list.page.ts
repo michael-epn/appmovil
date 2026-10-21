@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { PokemonService } from 'src/app/services/pokemon.service';
 
 
@@ -12,7 +13,7 @@ export class PokemonListPage implements OnInit {
   pokemonsFiltrados: any[] = [];
   loading = false;
 
-  constructor(private pokemonService: PokemonService) {}
+  constructor(private pokemonService: PokemonService, private router: Router) {}
 
   ngOnInit() {
     this.fetchPokemons();
@@ -40,5 +41,8 @@ export class PokemonListPage implements OnInit {
     this.pokemonsFiltrados = query
       ? this.pokemons.filter(p => p.name.toLowerCase().includes(query))
       : [...this.pokemons];
+  }
+  verDetalle(name: string) {
+    this.router.navigate(['/pokemon-detail', name]);
   }
 }

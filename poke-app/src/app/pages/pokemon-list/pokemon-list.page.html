@@ -10,9 +10,9 @@
 <ion-content>
   <ion-list>
     @for (pokemon of pokemonsFiltrados; track pokemon.name) {
-    <ion-item>
+    <ion-item button detail="true" (click)="verDetalle(pokemon.name)">
       <ion-label>
-        <h2>{{ pokemon.name }}</h2>
+        <h2>{{ pokemon.name | titlecase }}</h2>
       </ion-label>
     </ion-item>
     } @empty {

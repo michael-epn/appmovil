@@ -1,0 +1,135 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/pokemon-list"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ pokemon?.name | titlecase }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="loading" class="ion-text-center">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <ion-text color="danger" *ngIf="!loading && errorMessage">
+    <p class="ion-text-center">{{ errorMessage }}</p>
+  </ion-text>
+
+  <ng-container *ngIf="!loading && pokemon">
+    <ion-card>
+      <img
+        class="featured-image"
+        [src]="pokemon.sprites?.other?.['official-artwork']?.front_default || pokemon.sprites?.front_default"
+        [alt]="pokemon.name"
+      />
+
+      <ion-card-header>
+        <ion-card-subtitle>#{{ pokemon.id }}</ion-card-subtitle>
+        <ion-card-title>{{ pokemon.name | titlecase }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label>Experiencia base</ion-label>
+            <ion-note slot="end">{{ pokemon.base_experience }} XP</ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-label>Altura / Peso</ion-label>
+            <ion-note slot="end">{{ pokemon.height / 10 }} m / {{ pokemon.weight / 10 }} kg</ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-label>Tipos</ion-label>
+            <ion-chip *ngFor="let type of pokemon.types" color="secondary">
+              {{ type.type.name | titlecase }}
+            </ion-chip>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <section aria-labelledby="sound-title">
+      <h2 id="sound-title">Sonido del Pokémon</h2>
+      <audio
+        *ngIf="pokemon.cries?.latest || pokemon.cries?.legacy"
+        controls
+        [src]="pokemon.cries?.latest || pokemon.cries?.legacy"
+      >
+        Tu navegador no puede reproducir este audio.
+      </audio>
+      <ion-note *ngIf="!pokemon.cries?.latest && !pokemon.cries?.legacy">
+        No hay sonido disponible para este Pokémon.
+      </ion-note>
+    </section>
+
+    <section aria-labelledby="gallery-title">
+      <h2 id="gallery-title">Galería</h2>
+      <div class="image-gallery">
+        <figure *ngFor="let image of galleryImages; let index = index">
+          <img [src]="image" [alt]="pokemon.name + ' imagen ' + (index + 1)" loading="lazy" />
+          <figcaption>Imagen {{ index + 1 }}</figcaption>
+        </figure>
+      </div>
+      <ion-note *ngIf="galleryImages.length < 5">
+        La API solo ofrece {{ galleryImages.length }} imágenes para este Pokémon.
+      </ion-note>
+    </section>
+
+    <section aria-labelledby="animation-title">
+      <h2 id="animation-title">Animación</h2>
+      <ion-card class="animation-card">
+        <img [src]="animatedImageUrl" [alt]="'Animación de ' + pokemon.name" />
+        <ion-card-content>Sprite animado en formato GIF.</ion-card-content>
+      </ion-card>
+    </section>
+
+    <section aria-labelledby="compare-title">
+      <h2 id="compare-title">Comparar Pokémon</h2>
+      <ion-item>
+        <ion-label>Elige un Pokémon</ion-label>
+        <ion-select
+          interface="popover"
+          placeholder="Seleccionar"
+          (ionChange)="compararCon($event.detail.value)"
+        >
+          <ion-select-option
+            *ngFor="let option of pokemonOptions"
+            [value]="option.name"
+            [disabled]="option.name === pokemon.name"
+          >
+            {{ option.name | titlecase }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-text color="danger" *ngIf="comparisonError">
+        <p>{{ comparisonError }}</p>
+      </ion-text>
+
+      <div class="comparison-grid" *ngIf="comparisonPokemon">
+        <ion-card *ngFor="let candidate of [pokemon, comparisonPokemon]">
+          <img
+            class="comparison-image"
+            [src]="candidate.sprites?.other?.['official-artwork']?.front_default || candidate.sprites?.front_default"
+            [alt]="candidate.name"
+          />
+          <ion-card-header>
+            <ion-card-title>{{ candidate.name | titlecase }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>Altura: {{ candidate.height / 10 }} m</p>
+            <p>Peso: {{ candidate.weight / 10 }} kg</p>
+            <p>Experiencia base: {{ candidate.base_experience }} XP</p>
+            <p>
+              Tipos:
+              <span *ngFor="let type of candidate.types; let last = last">
+                {{ type.type.name | titlecase }}<span *ngIf="!last">, </span>
+              </span>
+            </p>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </section>
+  </ng-container>
+</ion-content>
