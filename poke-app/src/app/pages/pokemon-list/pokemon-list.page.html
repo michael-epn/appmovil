@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Pokémon List</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar placeholder="Busca tu pokémon" [(ngModel)]="searchTerm" (ionInput)="filtrar()"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    @for (pokemon of pokemonsFiltrados; track pokemon.name) {
+    <ion-item>
+      <ion-label>
+        <h2>{{ pokemon.name }}</h2>
+      </ion-label>
+    </ion-item>
+    } @empty {
+    <ion-item>
+      <ion-note>No hay pokémons</ion-note>
+    </ion-item>
+    }
+  </ion-list>
+
+  <ion-spinner *ngIf="loading" class="loading-spinner"></ion-spinner>
+</ion-content>
