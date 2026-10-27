@@ -1,20 +1,68 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <ion-title>Rick and Morty - Characters</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      placeholder="Search characters"
+      [value]="searchTerm()"
+      [debounce]="0"
+      (ionInput)="onSearchChange($event)"
+    />
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refreshCharacters($event)">
+    <ion-refresher-content
+      pullingText="Pull to refresh"
+      refreshingSpinner="crescent"
+      refreshingText="Updating characters..."
+    />
+  </ion-refresher>
+
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+      <ion-title size="large">Characters</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <main>
+    @if (loading()) {
+      <div class="state" role="status">
+        <ion-spinner name="crescent" />
+        <p>Loading characters...</p>
+      </div>
+    } @else if (error()) {
+      <div class="state" role="alert">
+        <p>{{ error() }}</p>
+        <button type="button" (click)="loadCharacters()">Retry</button>
+      </div>
+    } @else {
+      <section class="character-grid" aria-label="Characters">
+        @for (character of characters(); track character.id) {
+          <ion-card>
+            <img [src]="character.image" [alt]="character.name" />
+            <ion-card-header>
+              <ion-card-title>{{ character.name }}</ion-card-title>
+              <ion-card-subtitle>{{ character.status.toLowerCase() }} · {{ character.species }}</ion-card-subtitle>
+            </ion-card-header>
+          </ion-card>
+        }
+      </section>
+      @if (loadMoreError()) {
+        <p role="alert">{{ loadMoreError() }}</p>
+      }
+      <ion-infinite-scroll
+        threshold="100px"
+        [disabled]="!nextUrl()"
+        (ionInfinite)="loadNextPage($event)"
+      >
+        <ion-infinite-scroll-content
+          loadingSpinner="crescent"
+          loadingText="Loading more characters..."
+        />
+      </ion-infinite-scroll>
+    }
+  </main>
 </ion-content>
