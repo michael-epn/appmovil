@@ -20,18 +20,3 @@ npx ionic serve
 ```
 
 Si Ionic CLI está instalado globalmente, también se puede ejecutar `ionic serve`. Como alternativa, este proyecto incluye el script `npm start`.
-
-## Capturas y GIFs
-
-Adjunta aquí evidencia de la aplicación en funcionamiento:
-
-<!-- Reemplaza estos marcadores por las rutas de las capturas o GIFs. -->
-![Listado de personajes](docs/screenshots/characters.png)
-
-![Búsqueda y desplazamiento infinito](docs/screenshots/search-and-pagination.gif)
-
-## Mensaje de commit sugerido
-
-```text
-feat(characters): add search and infinite pagination
-```
