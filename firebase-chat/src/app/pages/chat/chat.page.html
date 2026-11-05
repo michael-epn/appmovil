@@ -1,0 +1,93 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Chat Firebase</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  @if (!connected) {
+    <div class="connection">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Conectando con Firebase...</p>
+    </div>
+  }
+
+  @if (connected) {
+    <div>
+
+    <ion-item>
+      <ion-input
+        label="Tu nombre"
+        labelPlacement="stacked"
+        placeholder="Ejemplo: Juan"
+        maxlength="30"
+        [(ngModel)]="nickname">
+      </ion-input>
+    </ion-item>
+
+    <h3>Chat grupal</h3>
+
+    <div class="chat-container">
+
+      @for (msg of messages; track msg) {
+        <div
+          class="message"
+          [class.mine]="isMine(msg)">
+
+          <div class="nickname">
+            {{ msg.nickname }}
+          </div>
+
+          <div class="message-text">
+            {{ msg.text }}
+          </div>
+
+          @if (msg.createdAt) {
+            <div class="time">
+              {{ msg.createdAt.toDate() | date:'shortTime' }}
+            </div>
+          }
+
+        </div>
+      }
+
+      @if (messages.length === 0) {
+        <p>Todavía no hay mensajes.</p>
+      }
+
+    </div>
+
+    </div>
+  }
+
+  @if (error) {
+    <ion-text color="danger">
+      <p>{{ error }}</p>
+    </ion-text>
+  }
+
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-item>
+
+      <ion-input
+        placeholder="Escribe un mensaje..."
+        maxlength="1000"
+        [(ngModel)]="message"
+        (keyup.enter)="send()">
+      </ion-input>
+
+      <ion-button
+        slot="end"
+        (click)="send()"
+        [disabled]="!connected || sending ||
+                    !message.trim() || !nickname.trim()">
+        Enviar
+      </ion-button>
+
+    </ion-item>
+  </ion-toolbar>
+</ion-footer>
