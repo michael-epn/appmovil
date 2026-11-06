@@ -42,6 +42,14 @@ export class PokemonListPage implements OnInit {
       ? this.pokemons.filter(p => p.name.toLowerCase().includes(query))
       : [...this.pokemons];
   }
+
+  imageUrl(pokemonUrl: string): string {
+    const id = pokemonUrl.match(/\/pokemon\/(\d+)\/?$/)?.[1];
+    return id
+      ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+      : '';
+  }
+
   verDetalle(name: string) {
     this.router.navigate(['/pokemon-detail', name]);
   }

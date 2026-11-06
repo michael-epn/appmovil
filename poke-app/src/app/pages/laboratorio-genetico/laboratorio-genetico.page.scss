@@ -1,0 +1,119 @@
+.intro-panel {
+  margin-bottom: 1rem;
+  padding: 1.1rem;
+}
+
+.intro-panel h1 {
+  margin: 0.3rem 0;
+  font-size: 1.45rem;
+}
+
+.intro-panel p:last-child,
+.chart-caption {
+  color: var(--ion-color-medium);
+}
+
+.eyebrow {
+  color: var(--ion-color-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.selection-field {
+  --background: transparent;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+}
+
+.chart-caption {
+  margin: 1.2rem 0;
+}
+
+.evolution-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stage-card {
+  display: flex;
+  width: min(100%, 16rem);
+  flex-direction: column;
+  align-items: center;
+  padding: 0.9rem;
+  color: var(--ion-text-color);
+  font: inherit;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.stage-card:active {
+  transform: scale(0.97);
+}
+
+.stage-card img {
+  width: 6rem;
+  height: 6rem;
+  object-fit: contain;
+}
+
+.stage-number {
+  color: var(--ion-color-primary);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.stage-card strong {
+  margin: 0.25rem 0;
+}
+
+.stage-card small {
+  color: var(--ion-color-medium);
+  text-align: center;
+}
+
+.evolution-branches {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.evolution-branch {
+  display: flex;
+  max-width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+
+.branch-condition {
+  margin-bottom: 0.65rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 99px;
+  background: rgba(249, 200, 70, 0.12);
+  color: var(--ion-color-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.evolution-skeleton {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.skeleton-node {
+  width: 100%;
+  height: 8rem;
+  border-radius: 1.25rem;
+}
+
+.feedback-message {
+  text-align: center;
+}

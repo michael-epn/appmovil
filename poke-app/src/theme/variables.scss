@@ -1,2 +1,43 @@
-// For information on how to create your own theme, please see:
-// http://ionicframework.com/docs/theming/
+/*
+ * Neo-Pokedex palette for the Ionic application.
+ * See https://ionicframework.com/docs/theming for theme variables.
+ */
+:root {
+  --ion-color-primary: #f9c846;
+  --ion-color-primary-rgb: 249, 200, 70;
+  --ion-color-primary-contrast: #172033;
+  --ion-color-primary-contrast-rgb: 23, 32, 51;
+  --ion-color-primary-shade: #dbb03e;
+  --ion-color-primary-tint: #fad05a;
+
+  --ion-color-secondary: #4fd1c5;
+  --ion-color-secondary-rgb: 79, 209, 197;
+  --ion-color-secondary-contrast: #10232c;
+  --ion-color-secondary-contrast-rgb: 16, 35, 44;
+  --ion-color-secondary-shade: #45b8ad;
+  --ion-color-secondary-tint: #61d6cb;
+
+  --ion-color-tertiary: #a78bfa;
+  --ion-color-tertiary-rgb: 167, 139, 250;
+  --ion-color-tertiary-contrast: #17142a;
+  --ion-color-tertiary-contrast-rgb: 23, 20, 42;
+  --ion-color-tertiary-shade: #937ad8;
+  --ion-color-tertiary-tint: #b097fb;
+
+  --ion-color-success: #6ee7a4;
+  --ion-color-success-rgb: 110, 231, 164;
+  --ion-color-success-contrast: #10231b;
+  --ion-color-success-contrast-rgb: 16, 35, 27;
+  --ion-color-success-shade: #61cb90;
+  --ion-color-success-tint: #7ae9ad;
+
+  --ion-background-color: #0b1020;
+  --ion-background-color-rgb: 11, 16, 32;
+  --ion-text-color: #f4f6fb;
+  --ion-text-color-rgb: 244, 246, 251;
+  --ion-color-medium: #a0acc0;
+  --ion-color-step-150: rgba(255, 255, 255, 0.13);
+  --ion-toolbar-background: rgba(11, 16, 32, 0.78);
+  --ion-item-background: transparent;
+  --ion-card-background: rgba(255, 255, 255, 0.06);
+}
