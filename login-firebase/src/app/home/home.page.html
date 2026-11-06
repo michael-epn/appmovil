@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Inicio</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <h2>¡Bienvenido!</h2>
+
+  <ng-container *ngIf="user$ | async as user">
+    <p>Usuario autenticado:</p>
+    <strong>{{ user.email }}</strong>
+  </ng-container>
+
+  <ion-button
+    expand="block"
+    color="danger"
+    (click)="logout()">
+    Cerrar sesión
+  </ion-button>
+
+</ion-content>

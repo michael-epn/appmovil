@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Firebase Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <h2>Bienvenido</h2>
+  <p>Inicia sesión o crea una cuenta.</p>
+
+  <ion-item>
+    <ion-input
+      label="Correo electrónico"
+      labelPlacement="stacked"
+      type="email"
+      [(ngModel)]="email">
+    </ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-input
+      label="Contraseña"
+      labelPlacement="stacked"
+      type="password"
+      [(ngModel)]="password">
+    </ion-input>
+  </ion-item>
+
+  <ion-button
+    expand="block"
+    [disabled]="loading || !email || !password"
+    (click)="login()">
+    Iniciar sesión
+  </ion-button>
+
+  <ion-button
+    expand="block"
+    fill="outline"
+    [disabled]="loading || !email || !password"
+    (click)="register()">
+    Registrarse
+  </ion-button>
+
+  <ion-text color="danger">
+    <p>{{ error }}</p>
+  </ion-text>
+
+</ion-content>
