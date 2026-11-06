@@ -40,7 +40,7 @@ export class OraculoElementalPage implements OnInit {
         this.errorMessage = 'No se pudo cargar el catálogo de tipos.';
       },
     });
-    this.pokemonService.getPokemons(151).subscribe({
+    this.pokemonService.getPokemons(1302).subscribe({
       next: (response) => (this.pokemonOptions = response.results),
       error: (error: unknown) => {
         console.error('No se pudo cargar el catálogo de especímenes:', error);

@@ -21,7 +21,7 @@ export class LaboratorioGeneticoPage implements OnInit {
   constructor(private pokemonService: PokemonService, private router: Router) {}
 
   ngOnInit(): void {
-    this.pokemonService.getPokemons(151).subscribe({
+    this.pokemonService.getPokemons(1302).subscribe({
       next: (response) => (this.pokemonOptions = response.results),
       error: (error: unknown) => {
         console.error('No se pudo cargar el catálogo del laboratorio:', error);

@@ -22,7 +22,7 @@ export class PokemonListPage implements OnInit {
 
   fetchPokemons() {
     this.loading = true;
-    this.pokemonService.getPokemons(10).subscribe({
+    this.pokemonService.getPokemons(1302).subscribe({
       next: (response) => {
         this.pokemons = response.results;
         this.pokemonsFiltrados = response.results;
