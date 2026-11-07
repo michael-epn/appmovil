@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.michaelvargas.pokeapp;
 
 import com.getcapacitor.BridgeActivity;
 
