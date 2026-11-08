@@ -6,7 +6,7 @@ Aplicación móvil híbrida construida con Ionic, Angular Standalone y Capacitor
 
 - **Ionic + Angular Standalone**: interfaz responsive con páginas lazy-loaded y formularios reactivos.
 - **Firebase Authentication**: registro, inicio/cierre de sesión y estado de autenticación.
-- **Cloud Firestore**: salas y mensajes con actualizaciones en tiempo real.
+- **Cloud Firestore**: salas y mensajes con actualizaciones en tiempo real mediante AngularFire.
 - **Supabase Database**: tabla `profiles` para sincronizar los UID/correos de Firebase y almacenar datos editables del perfil.
 - **Supabase Storage**: buckets `avatars` y `chat-files` para imágenes de perfil y adjuntos.
 - **Supabase Realtime Presence**: presencia y estado de escritura por sala.
@@ -18,7 +18,7 @@ Firebase y Supabase son servicios separados. Iniciar sesión con Firebase no aut
 
 1. **Autenticación y sincronización de perfiles**: registro, inicio/cierre de sesión y estado de sesión con Firebase Authentication; durante el registro se crea o actualiza el perfil de Supabase con el UID de Firebase.
 2. **Gestión de perfil y avatar**: edición del nombre y la biografía; selección y carga de la foto en el bucket `avatars`.
-3. **Salas en tiempo real**: creación de salas y listado reactivo de documentos de Firestore.
+3. **Salas en tiempo real**: creación de salas y listado reactivo de documentos de Firestore. El listener entrega cada cambio a Signals de Angular, incluida la creación de una sala.
 4. **Búsqueda de salas**: filtro por nombre con `ion-searchbar` y debounce.
 5. **Chat en tiempo real**: envío y escucha de mensajes de texto ordenados cronológicamente por `createdAt`.
 6. **Búsqueda en conversaciones**: filtro local de mensajes por palabra clave.
@@ -28,6 +28,12 @@ Firebase y Supabase son servicios separados. Iniciar sesión con Firebase no aut
 10. **Presencia y escritura**: presencia de usuarios por sala con Supabase Realtime, contador de usuarios en línea e indicador de quién está escribiendo.
 11. **Administración de mensajes propios**: mantener pulsado un mensaje para editarlo o eliminarlo.
 12. **Interacción y preferencias**: reacciones 👍, ❤️ y 😂, confirmaciones de lectura y tema oscuro persistido con Capacitor Preferences.
+
+### Actualizaciones en tiempo real de Firestore
+
+Las operaciones de Firestore usan exclusivamente `@angular/fire/firestore`. `ChatService` crea las referencias y consultas con AngularFire y adapta `onSnapshot()` a un Observable, ejecutando sus emisiones dentro de `NgZone` para que Angular refleje los cambios en la interfaz. `RoomsPage` se suscribe al entrar en la pestaña, actualiza el Signal `rooms` con cada emisión y cancela la suscripción al salir. Por eso una sala nueva aparece automáticamente sin recargar la página.
+
+Evita mezclar `Query`, `collection`, `query` u otras funciones del SDK nativo `firebase/firestore` o de `@firebase/firestore` con referencias de AngularFire: son tipos incompatibles.
 
 ## Requisitos
 
