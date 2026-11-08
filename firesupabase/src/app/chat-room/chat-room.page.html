@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-button slot="start" fill="clear" (click)="goBack()">Salas</ion-button>
+    <ion-title>Conversación</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar [formControl]="searchControl" placeholder="Buscar mensajes"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (errorMessage) {
+  <p class="error-message" role="alert">{{ errorMessage }}</p>
+  } @if (filteredMessages$ | async; as messages) {
+  <ion-list lines="none">
+    @for (message of messages; track message.id) {
+    <ion-item>
+      <ion-label class="ion-text-wrap">
+        <h3>{{ message.senderName }} @if (message.edited) { <small>(editado)</small> }</h3>
+        @if (message.text) {
+        <p>{{ message.text }}</p>
+        } @if (message.fileUrl) {
+        <p><a [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">Abrir archivo</a></p>
+        } @if (message.location) {
+        <p>Ubicación: {{ message.location.latitude }}, {{ message.location.longitude }}</p>
+        }
+      </ion-label>
+    </ion-item>
+    } @empty {
+    <p class="empty-state">No hay mensajes que coincidan.</p>
+    }
+  </ion-list>
+  }
+</ion-content>
+
+<form class="composer" [formGroup]="messageForm" (ngSubmit)="sendMessage()">
+  <ion-item>
+    <ion-input label="Mensaje" labelPlacement="stacked" placeholder="Escribe un mensaje" formControlName="text" />
+  </ion-item>
+  <ion-button type="submit" [disabled]="messageForm.invalid">Enviar</ion-button>
+</form>

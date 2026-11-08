@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Salas de chat</ion-title>
+    <ion-button slot="end" fill="clear" routerLink="/profile">Perfil</ion-button>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar [formControl]="searchControl" placeholder="Buscar salas"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (errorMessage) {
+  <p class="error-message" role="alert">{{ errorMessage }}</p>
+  }
+  <ion-button expand="block" (click)="openCreateRoomAlert()">Crear sala</ion-button>
+
+  @if (filteredRooms$ | async; as rooms) { @if (rooms.length) {
+  <ion-list>
+    @for (room of rooms; track room.id) {
+    <ion-item button detail="true" (click)="openRoom(room.id)">
+      <ion-label>
+        <h2>{{ room.name }}</h2>
+        <p>{{ room.description || 'Sin descripción' }}</p>
+      </ion-label>
+    </ion-item>
+    }
+  </ion-list>
+  } @else {
+  <p class="empty-state">No hay salas que coincidan con la búsqueda.</p>
+  } }
+</ion-content>

@@ -171,6 +171,10 @@ export class ProfilePage {
     }
   }
 
+  async openRooms(): Promise<void> {
+    await this.router.navigateByUrl('/rooms');
+  }
+
   private async ensureProfile(user: User): Promise<void> {
     const email = user.email ?? '';
     const { data, error } = await this.supabase.client
