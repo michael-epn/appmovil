@@ -40,7 +40,7 @@ export class LoginPage {
       } else {
         await this.authService.signIn(email, password);
       }
-      await this.router.navigateByUrl('/profile');
+      await this.router.navigateByUrl('/tabs/profile');
     } catch (error) {
       this.errorMessage = error instanceof Error ? error.message : 'No se pudo completar la autenticación.';
     } finally {

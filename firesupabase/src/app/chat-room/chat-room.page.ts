@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component, inject, type ElementRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,13 +7,11 @@ import { Geolocation } from '@capacitor/geolocation';
 import {
   IonButton,
   IonContent,
+  IonFooter,
   IonHeader,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonNote,
+  IonIcon,
   IonSearchbar,
+  IonTextarea,
   IonTitle,
   IonToolbar,
   ActionSheetController,
@@ -21,6 +19,15 @@ import {
 } from '@ionic/angular';
 import { type RealtimeChannel } from '@supabase/supabase-js';
 import { type User } from 'firebase/auth';
+import { addIcons } from 'ionicons';
+import {
+  addCircleOutline,
+  checkmarkDoneOutline,
+  documentTextOutline,
+  imageOutline,
+  locationOutline,
+  send,
+} from 'ionicons/icons';
 import {
   combineLatest,
   debounceTime,
@@ -45,16 +52,15 @@ import { SupabaseService } from '../services/supabase.service';
   styleUrl: './chat-room.page.scss',
   imports: [
     AsyncPipe,
+    DatePipe,
     ReactiveFormsModule,
     IonButton,
     IonContent,
+    IonFooter,
     IonHeader,
-    IonInput,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonNote,
+    IonIcon,
     IonSearchbar,
+    IonTextarea,
     IonTitle,
     IonToolbar,
   ],
@@ -102,6 +108,10 @@ export class ChatRoomPage {
   private readSubscription?: Subscription;
   private typingTimer?: ReturnType<typeof setTimeout>;
   private messagePressTimer?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    addIcons({ addCircleOutline, checkmarkDoneOutline, documentTextOutline, imageOutline, locationOutline, send });
+  }
 
   async ionViewWillEnter(): Promise<void> {
     try {

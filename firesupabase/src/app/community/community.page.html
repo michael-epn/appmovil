@@ -1,0 +1,57 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Comunidad</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <header class="page-heading">
+    <p class="eyebrow">FIRESUPABASE</p>
+    <h1>Personas</h1>
+    <p>Encuentra a la comunidad y descubre quién está en línea.</p>
+  </header>
+
+  @if (errorMessage) {
+  <p class="error-message" role="alert">{{ errorMessage }}</p>
+  } @if (isLoading) {
+  <ion-list class="people-list">
+    @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+    <ion-item>
+      <ion-avatar slot="start" class="placeholder-avatar"></ion-avatar>
+      <ion-label>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+      </ion-label>
+    </ion-item>
+    }
+  </ion-list>
+  } @else if (profiles.length) {
+  <ion-list class="people-list">
+    @for (profile of profiles; track profile.id) {
+    <ion-item>
+      <ion-avatar slot="start">
+        @if (profile.avatar_url) {
+        <img [src]="profile.avatar_url" [alt]="'Avatar de ' + profile.username" />
+        } @else {
+        <div class="avatar-initials">{{ initials(profile) }}</div>
+        }
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ profile.username || 'Usuario' }}</h2>
+        <p>{{ profile.bio || profile.email }}</p>
+      </ion-label>
+      <span class="presence" [class.online]="isOnline(profile.id)">
+        <span class="presence-dot"></span>
+        {{ isOnline(profile.id) ? 'En línea' : 'Desconectado' }}
+      </span>
+    </ion-item>
+    }
+  </ion-list>
+  } @else {
+  <section class="empty-state">
+    <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+    <h2>Aún no hay perfiles</h2>
+    <p>Cuando se registren usuarios, aparecerán aquí.</p>
+  </section>
+  }
+</ion-content>

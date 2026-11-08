@@ -1,117 +1,159 @@
-<ion-header>
+<ion-header class="ion-no-border chat-header">
   <ion-toolbar>
-    <ion-button slot="start" fill="clear" (click)="goBack()">Salas</ion-button>
-    <ion-title>Conversación</ion-title>
-    <ion-note slot="end">{{ onlineCount }} en línea</ion-note>
+    <ion-button slot="start" fill="clear" class="back-button" (click)="goBack()">Salas</ion-button>
+    <ion-title>
+      <span class="chat-title">Conversación</span>
+      <span class="online-indicator"><i></i>{{ onlineCount }} en línea</span>
+    </ion-title>
   </ion-toolbar>
   @if (typingUsers.length) {
-  <ion-toolbar>
+  <ion-toolbar class="typing-toolbar">
     <ion-title size="small">{{ typingUsers.join(', ') }} escribiendo...</ion-title>
   </ion-toolbar>
   }
-  <ion-toolbar>
-    <ion-searchbar [formControl]="searchControl" placeholder="Buscar mensajes"></ion-searchbar>
+  <ion-toolbar class="search-toolbar">
+    <ion-searchbar [formControl]="searchControl" placeholder="Buscar en la conversación" shape="round"></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  @if (errorMessage) {
-  <p class="error-message" role="alert">{{ errorMessage }}</p>
-  } @if (filteredMessages$ | async; as messages) {
-  <ion-list lines="none">
-    @for (message of messages; track message.id) {
-    <ion-item
+<ion-content class="chat-content" [scrollEvents]="true">
+  <div class="chat-feed">
+    @if (errorMessage) {
+    <p class="error-message" role="alert">{{ errorMessage }}</p>
+    } @if (filteredMessages$ | async; as messages) { @for (message of messages; track message.id) {
+    <article
+      class="message-row"
+      [class.own]="message.senderId === currentUser?.uid"
       (pointerdown)="startMessagePress(message)"
       (pointerup)="cancelMessagePress()"
       (pointerleave)="cancelMessagePress()"
       (pointercancel)="cancelMessagePress()"
+      (contextmenu)="$event.preventDefault(); startMessagePress(message)"
     >
-      <ion-label class="ion-text-wrap">
-        <h3>{{ message.senderName }} @if (message.edited) { <small>(editado)</small> }</h3>
-        @if (message.text) {
-        <p>{{ message.text }}</p>
-        } @if (message.type === 'image' && message.fileUrl) {
-        <a [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">
-          <img class="message-image" [src]="message.fileUrl" alt="Imagen compartida" />
-        </a>
-        } @if (message.type === 'file' && message.fileUrl) {
-        <div class="attachment-card">
-          <span>{{ message.fileName || 'Archivo adjunto' }}</span>
-          <a [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">Descargar</a>
-        </div>
-        } @if (message.type === 'location' && (message.lat !== null || message.location)) {
-        <a
-          class="location-card"
-          [href]="'https://www.google.com/maps?q=' + (message.lat ?? message.location?.latitude) + ',' + (message.lng ?? message.location?.longitude)"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <strong>Ubicación compartida</strong>
-          <span>{{ message.lat ?? message.location?.latitude }}, {{ message.lng ?? message.location?.longitude }}</span>
-          <span>Abrir en Google Maps</span>
-        </a>
-        } @if (!message.type && message.fileUrl) {
-        <p><a [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">Abrir archivo</a></p>
-        } @if (!message.type && message.location) {
-        <p>Ubicación: {{ message.location.latitude }}, {{ message.location.longitude }}</p>
-        }
-        <div class="message-actions">
-          @for (emoji of reactionEmojis; track emoji) {
-          <ion-button size="small" fill="clear" (click)="reactToMessage(message, emoji)">
-            {{ emoji }} {{ message.reactions?.[emoji]?.length ?? 0 }}
-          </ion-button>
-          } @if (message.senderId === currentUser?.uid) {
-          <span class="read-receipt" [attr.aria-label]="(message.readBy?.length ?? 0) > 1 ? 'Leído' : 'Enviado'">
-            {{ (message.readBy?.length ?? 0) > 1 ? '✓✓' : '✓' }}
-          </span>
+      <div class="message-stack">
+        <div class="message-bubble">
+          @if (message.senderId !== currentUser?.uid) {
+          <h3 class="message-author">{{ message.senderName }}</h3>
+          } @if (message.text) {
+          <p class="message-text">{{ message.text }}</p>
+          } @if (message.type === 'image' && message.fileUrl) {
+          <a class="image-card" [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">
+            <img [src]="message.fileUrl" alt="Imagen compartida" />
+          </a>
+          } @if (message.type === 'file' && message.fileUrl) {
+          <a class="file-card" [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <span>{{ message.fileName || 'Archivo adjunto' }}</span>
+            <span class="file-download">Abrir</span>
+          </a>
+          } @if (message.type === 'location' && (message.lat !== null || message.location)) {
+          <a
+            class="location-card"
+            [href]="'https://www.google.com/maps?q=' + (message.lat ?? message.location?.latitude) + ',' + (message.lng ?? message.location?.longitude)"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ion-icon name="location-outline"></ion-icon>
+            <span>
+              <strong>Ubicación compartida</strong>
+              <small>Abrir en Google Maps</small>
+            </span>
+          </a>
+          } @if (!message.type && message.fileUrl) {
+          <a class="file-card" [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <span>Abrir archivo</span>
+          </a>
+          } @if (!message.type && message.location) {
+          <p class="message-text">Ubicación: {{ message.location.latitude }}, {{ message.location.longitude }}</p>
           }
         </div>
-      </ion-label>
-    </ion-item>
+
+        <div class="message-meta">
+          <div class="reaction-pills">
+            @for (emoji of reactionEmojis; track emoji) {
+            <ion-button size="small" fill="clear" (click)="reactToMessage(message, emoji)">
+              {{ emoji }} {{ message.reactions?.[emoji]?.length ?? 0 }}
+            </ion-button>
+            }
+          </div>
+          <span class="message-time">
+            @if (message.edited) { Editado · } {{ message.createdAt?.toDate() | date: 'shortTime' }}
+          </span>
+          @if (message.senderId === currentUser?.uid) {
+          <ion-icon
+            class="read-receipt"
+            [class.read]="(message.readBy?.length ?? 0) > 1"
+            name="checkmark-done-outline"
+            [attr.aria-label]="(message.readBy?.length ?? 0) > 1 ? 'Leído' : 'Enviado'"
+          ></ion-icon>
+          }
+        </div>
+      </div>
+    </article>
     } @empty {
-    <p class="empty-state">No hay mensajes que coincidan.</p>
-    }
-  </ion-list>
-  }
+    <section class="empty-state">
+      <h2>La conversación empieza aquí</h2>
+      <p>Envía un mensaje para iniciar el chat.</p>
+    </section>
+    } }
+  </div>
 </ion-content>
 
-<form class="composer" [formGroup]="messageForm" (ngSubmit)="sendMessage()">
-  <input
-    #fileInput
-    class="file-input"
-    type="file"
-    accept=".pdf,.docx,.zip,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip"
-    (change)="sendFile($event)"
-  />
-  <ion-button type="button" fill="outline" aria-label="Enviar imagen" [disabled]="isSendingMedia" (click)="sendImage()">
-    Imagen
-  </ion-button>
-  <ion-button
-    type="button"
-    fill="outline"
-    aria-label="Adjuntar archivo"
-    [disabled]="isSendingMedia"
-    (click)="chooseFile()"
-  >
-    Archivo
-  </ion-button>
-  <ion-button
-    type="button"
-    fill="outline"
-    aria-label="Compartir ubicación"
-    [disabled]="isSendingMedia"
-    (click)="sendLocation()"
-  >
-    Ubicación
-  </ion-button>
-  <ion-item>
-    <ion-input
-      label="Mensaje"
-      labelPlacement="stacked"
-      placeholder="Escribe un mensaje"
-      formControlName="text"
-      (ionInput)="onMessageInput($event.detail.value)"
+<ion-footer class="chat-footer ion-no-border">
+  <form class="composer" [formGroup]="messageForm" (ngSubmit)="sendMessage()">
+    <input
+      #fileInput
+      class="file-input"
+      type="file"
+      accept=".pdf,.docx,.zip,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip"
+      (change)="sendFile($event)"
     />
-  </ion-item>
-  <ion-button type="submit" [disabled]="messageForm.invalid">Enviar</ion-button>
-</form>
+    <div class="composer-tools">
+      <ion-button
+        class="tool-button"
+        fill="clear"
+        type="button"
+        aria-label="Adjuntar archivo"
+        [disabled]="isSendingMedia"
+        (click)="chooseFile()"
+      >
+        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      </ion-button>
+      <ion-button
+        class="tool-button"
+        fill="clear"
+        type="button"
+        aria-label="Enviar imagen"
+        [disabled]="isSendingMedia"
+        (click)="sendImage()"
+      >
+        <ion-icon slot="icon-only" name="image-outline"></ion-icon>
+      </ion-button>
+      <ion-button
+        class="tool-button"
+        fill="clear"
+        type="button"
+        aria-label="Compartir ubicación"
+        [disabled]="isSendingMedia"
+        (click)="sendLocation()"
+      >
+        <ion-icon slot="icon-only" name="location-outline"></ion-icon>
+      </ion-button>
+    </div>
+    <div class="composer-field">
+      <ion-textarea
+        label="Mensaje"
+        labelPlacement="sr-only"
+        placeholder="Escribe un mensaje..."
+        formControlName="text"
+        [autoGrow]="true"
+        [rows]="1"
+        (ionInput)="onMessageInput($event.detail.value)"
+      ></ion-textarea>
+    </div>
+    <ion-button class="send-button" type="submit" aria-label="Enviar mensaje" [disabled]="messageForm.invalid">
+      <ion-icon slot="icon-only" name="send"></ion-icon>
+    </ion-button>
+  </form>
+</ion-footer>

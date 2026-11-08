@@ -188,10 +188,6 @@ export class ProfilePage {
     }
   }
 
-  async openRooms(): Promise<void> {
-    await this.router.navigateByUrl('/rooms');
-  }
-
   async setDarkMode(enabled: boolean): Promise<void> {
     try {
       await this.theme.setDarkMode(enabled);

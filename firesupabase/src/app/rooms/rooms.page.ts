@@ -4,17 +4,35 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   AlertController,
+  IonAvatar,
+  IonBadge,
   IonButton,
   IonContent,
+  IonFab,
+  IonFabButton,
   IonHeader,
+  IonIcon,
   IonItem,
   IonLabel,
   IonList,
   IonSearchbar,
+  IonSkeletonText,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular';
-import { combineLatest, debounceTime, firstValueFrom, map, startWith, type Observable } from 'rxjs';
+import { addIcons } from 'ionicons';
+import { addOutline, chatbubblesOutline } from 'ionicons/icons';
+import {
+  catchError,
+  combineLatest,
+  debounceTime,
+  firstValueFrom,
+  map,
+  of,
+  startWith,
+  tap,
+  type Observable,
+} from 'rxjs';
 
 import { type Room } from '../models/chat.models';
 import { AuthService } from '../services/auth.service';
@@ -27,13 +45,19 @@ import { ChatService } from '../services/chat.service';
   imports: [
     AsyncPipe,
     ReactiveFormsModule,
+    IonAvatar,
+    IonBadge,
     IonButton,
     IonContent,
+    IonFab,
+    IonFabButton,
     IonHeader,
+    IonIcon,
     IonItem,
     IonLabel,
     IonList,
     IonSearchbar,
+    IonSkeletonText,
     IonTitle,
     IonToolbar,
   ],
@@ -45,7 +69,16 @@ export class RoomsPage {
   private readonly router = inject(Router);
 
   readonly searchControl = new FormControl('', { nonNullable: true });
-  readonly rooms$: Observable<Room[]> = this.chatService.listenRooms();
+  readonly rooms$: Observable<Room[]> = this.chatService.listenRooms().pipe(
+    tap(() => {
+      this.isLoading = false;
+    }),
+    catchError((error: unknown) => {
+      this.errorMessage = error instanceof Error ? error.message : 'No se pudieron cargar las salas.';
+      this.isLoading = false;
+      return of([]);
+    }),
+  );
   readonly filteredRooms$: Observable<Room[]> = combineLatest([
     this.rooms$,
     this.searchControl.valueChanges.pipe(startWith(this.searchControl.value), debounceTime(250)),
@@ -56,6 +89,11 @@ export class RoomsPage {
     }),
   );
   errorMessage = '';
+  isLoading = true;
+
+  constructor() {
+    addIcons({ addOutline, chatbubblesOutline });
+  }
 
   async openCreateRoomAlert(): Promise<void> {
     const alert = await this.alertController.create({

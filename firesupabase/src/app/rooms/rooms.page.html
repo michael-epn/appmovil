@@ -1,31 +1,73 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Salas de chat</ion-title>
-    <ion-button slot="end" fill="clear" routerLink="/profile">Perfil</ion-button>
+    <ion-title>Salas</ion-title>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-searchbar [formControl]="searchControl" placeholder="Buscar salas"></ion-searchbar>
+    <ion-title size="large" collapse="condense">Tus conversaciones</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      [formControl]="searchControl"
+      placeholder="Buscar salas"
+      shape="round"
+      animated="true"
+    ></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content [fullscreen]="true" class="rooms-content">
+  <div class="page-heading">
+    <p class="eyebrow">FIRESUPABASE</p>
+    <h1>Tus conversaciones</h1>
+    <p>Entra a una sala o crea una para empezar a conversar.</p>
+  </div>
+
   @if (errorMessage) {
   <p class="error-message" role="alert">{{ errorMessage }}</p>
-  }
-  <ion-button expand="block" (click)="openCreateRoomAlert()">Crear sala</ion-button>
-
-  @if (filteredRooms$ | async; as rooms) { @if (rooms.length) {
-  <ion-list>
-    @for (room of rooms; track room.id) {
-    <ion-item button detail="true" (click)="openRoom(room.id)">
+  } @if (isLoading) {
+  <ion-list class="rooms-list">
+    @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+    <ion-item class="room-item">
+      <ion-avatar slot="start"><ion-skeleton-text [animated]="true"></ion-skeleton-text></ion-avatar>
       <ion-label>
-        <h2>{{ room.name }}</h2>
-        <p>{{ room.description || 'Sin descripción' }}</p>
+        <h2><ion-skeleton-text [animated]="true" style="width: 55%"></ion-skeleton-text></h2>
+        <p><ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text></p>
       </ion-label>
     </ion-item>
     }
   </ion-list>
+  } @else if (filteredRooms$ | async; as rooms) { @if (rooms.length) {
+  <ion-list class="rooms-list">
+    @for (room of rooms; track room.id) {
+    <ion-item class="room-item" button detail="false" (click)="openRoom(room.id)">
+      <ion-avatar slot="start" class="room-avatar">
+        <span>{{ room.name.charAt(0).toLocaleUpperCase() }}</span>
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ room.name }}</h2>
+        <p>{{ room.description || 'Listos para conversar' }}</p>
+      </ion-label>
+      <ion-badge color="light" slot="end">Chat</ion-badge>
+    </ion-item>
+    }
+  </ion-list>
   } @else {
-  <p class="empty-state">No hay salas que coincidan con la búsqueda.</p>
+  <section class="empty-state">
+    <div class="empty-icon"><ion-icon name="chatbubbles-outline"></ion-icon></div>
+    <h2>{{ searchControl.value ? 'No encontramos esa sala' : 'Tu primera conversación empieza aquí' }}</h2>
+    <p>
+      {{ searchControl.value ? 'Prueba con otro nombre o crea una sala nueva.' : 'Crea una sala e invita a tu comunidad
+      a conversar.' }}
+    </p>
+    @if (!searchControl.value) {
+    <ion-button (click)="openCreateRoomAlert()">Crear una sala</ion-button>
+    }
+  </section>
   } }
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button aria-label="Crear sala" (click)="openCreateRoomAlert()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
