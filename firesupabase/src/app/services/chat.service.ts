@@ -24,8 +24,9 @@ export class ChatService {
   private readonly firestore = inject(Firestore);
 
   listenRooms(): Observable<Room[]> {
-    const rooms = collection(this.firestore, 'rooms');
-    return collectionData(query(rooms, orderBy('createdAt', 'desc')), { idField: 'id' }) as Observable<Room[]>;
+    const roomsCollection = collection(this.firestore, 'rooms');
+    const roomsQuery = query(roomsCollection, orderBy('createdAt', 'desc'));
+    return collectionData(roomsQuery, { idField: 'id' }) as Observable<Room[]>;
   }
 
   async createRoom(name: string, description: string, createdBy: string): Promise<string> {

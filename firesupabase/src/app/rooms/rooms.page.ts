@@ -21,7 +21,7 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { addOutline, chatbubblesOutline } from 'ionicons/icons';
-import { debounceTime, firstValueFrom, startWith, take, type Subscription } from 'rxjs';
+import { debounceTime, startWith, type Subscription } from 'rxjs';
 
 import { type Room } from '../models/chat.models';
 import { AuthService } from '../services/auth.service';
@@ -86,21 +86,23 @@ export class RoomsPage {
       const user = await this.authService.getCurrentUser();
       if (!user) {
         this.rooms.set([]);
+        this.isLoading.set(false);
         await this.router.navigateByUrl('/login', { replaceUrl: true });
         return;
       }
 
-      const rooms$ = this.chatService.listenRooms();
-      this.rooms.set(await firstValueFrom(rooms$.pipe(take(1))));
-      this.roomsSubscription = rooms$.subscribe({
-        next: (rooms) => this.rooms.set(rooms),
+      this.roomsSubscription = this.chatService.listenRooms().subscribe({
+        next: (rooms) => {
+          this.rooms.set(rooms);
+          this.isLoading.set(false);
+        },
         error: (error: unknown) => {
           this.errorMessage.set(error instanceof Error ? error.message : 'No se pudieron cargar las salas.');
+          this.isLoading.set(false);
         },
       });
     } catch (error) {
       this.errorMessage.set(error instanceof Error ? error.message : 'No se pudieron cargar las salas.');
-    } finally {
       this.isLoading.set(false);
     }
   }
