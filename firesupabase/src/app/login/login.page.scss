@@ -1,0 +1,22 @@
+.auth-card {
+  max-width: 440px;
+  margin: 12vh auto 0;
+}
+
+.auth-card h1 {
+  margin-bottom: 0.5rem;
+}
+
+.auth-card form {
+  margin-top: 2rem;
+}
+
+.auth-card ion-item {
+  margin-bottom: 0.75rem;
+}
+
+.field-error {
+  color: var(--ion-color-danger);
+  font-size: 0.875rem;
+  margin: 0.25rem 0 1rem;
+}

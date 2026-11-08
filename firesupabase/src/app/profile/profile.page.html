@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Mi perfil</ion-title>
+    <ion-button slot="end" fill="clear" (click)="logout()">Cerrar sesión</ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <main class="profile-card">
+    @if (isLoading) {
+    <p>Cargando perfil…</p>
+    } @else if (user) {
+    <p class="email">{{ user.email }}</p>
+
+    <div class="avatar">
+      @if (avatarUrl) {
+      <img [src]="avatarUrl" alt="Foto de perfil" />
+      } @else {
+      <span>Sin foto</span>
+      }
+    </div>
+    <ion-button expand="block" fill="outline" (click)="chooseAvatar()">Elegir foto de perfil</ion-button>
+
+    <form [formGroup]="form" (ngSubmit)="saveProfile()">
+      <ion-item>
+        <ion-input label="Nombre" labelPlacement="stacked" formControlName="username" />
+      </ion-item>
+      @if (form.controls.username.touched && form.controls.username.invalid) {
+      <p class="field-error">El nombre es obligatorio (máximo 50 caracteres).</p>
+      }
+
+      <ion-item>
+        <ion-textarea
+          label="Biografía"
+          labelPlacement="stacked"
+          formControlName="bio"
+          [autoGrow]="true"
+          [maxlength]="500"
+        />
+      </ion-item>
+
+      @if (errorMessage) {
+      <p class="field-error" role="alert">{{ errorMessage }}</p>
+      } @if (successMessage) {
+      <p class="success-message" role="status">{{ successMessage }}</p>
+      }
+
+      <ion-button expand="block" type="submit" [disabled]="isSaving">
+        {{ isSaving ? 'Guardando…' : 'Guardar perfil' }}
+      </ion-button>
+    </form>
+    }
+  </main>
+</ion-content>
