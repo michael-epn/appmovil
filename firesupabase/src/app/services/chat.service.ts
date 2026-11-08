@@ -12,7 +12,7 @@ import {
 } from '@angular/fire/firestore';
 import { type Observable } from 'rxjs';
 
-import { type Message, type MessageLocation, type Room } from '../models/chat.models';
+import { type Message, type MessageLocation, type MessageType, type Room } from '../models/chat.models';
 
 @Injectable({
   providedIn: 'root',
@@ -50,14 +50,20 @@ export class ChatService {
     text: string,
     fileUrl: string | null = null,
     location: MessageLocation | null = null,
+    type: MessageType = 'text',
+    fileName: string | null = null,
   ): Promise<void> {
     const messages = collection(this.firestore, `rooms/${roomId}/messages`);
     return addDoc(messages, {
       senderId,
       senderName,
+      type,
       text: text.trim(),
       fileUrl,
+      fileName,
       location,
+      lat: location?.latitude ?? null,
+      lng: location?.longitude ?? null,
       reactions: {},
       edited: false,
       readBy: [senderId],

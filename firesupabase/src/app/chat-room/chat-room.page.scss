@@ -1,13 +1,46 @@
 .composer {
   display: flex;
   align-items: end;
+  flex-wrap: wrap;
   gap: 0.75rem;
   padding: 0.5rem 1rem 1rem;
   background: var(--ion-background-color);
 }
 
+.file-input {
+  display: none;
+}
+
 .composer ion-item {
   flex: 1;
+  min-width: 180px;
+}
+
+.message-image {
+  display: block;
+  max-width: min(100%, 320px);
+  max-height: 320px;
+  border-radius: 0.75rem;
+  object-fit: cover;
+}
+
+.attachment-card,
+.location-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: var(--ion-color-light);
+  color: var(--ion-text-color);
+  text-decoration: none;
+}
+
+.location-card span:last-child {
+  color: var(--ion-color-primary);
 }
 
 .empty-state {

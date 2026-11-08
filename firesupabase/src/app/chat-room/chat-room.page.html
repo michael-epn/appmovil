@@ -19,9 +19,29 @@
         <h3>{{ message.senderName }} @if (message.edited) { <small>(editado)</small> }</h3>
         @if (message.text) {
         <p>{{ message.text }}</p>
-        } @if (message.fileUrl) {
+        } @if (message.type === 'image' && message.fileUrl) {
+        <a [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">
+          <img class="message-image" [src]="message.fileUrl" alt="Imagen compartida" />
+        </a>
+        } @if (message.type === 'file' && message.fileUrl) {
+        <div class="attachment-card">
+          <span>{{ message.fileName || 'Archivo adjunto' }}</span>
+          <a [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">Descargar</a>
+        </div>
+        } @if (message.type === 'location' && (message.lat !== null || message.location)) {
+        <a
+          class="location-card"
+          [href]="'https://www.google.com/maps?q=' + (message.lat ?? message.location?.latitude) + ',' + (message.lng ?? message.location?.longitude)"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <strong>Ubicación compartida</strong>
+          <span>{{ message.lat ?? message.location?.latitude }}, {{ message.lng ?? message.location?.longitude }}</span>
+          <span>Abrir en Google Maps</span>
+        </a>
+        } @if (!message.type && message.fileUrl) {
         <p><a [href]="message.fileUrl" target="_blank" rel="noopener noreferrer">Abrir archivo</a></p>
-        } @if (message.location) {
+        } @if (!message.type && message.location) {
         <p>Ubicación: {{ message.location.latitude }}, {{ message.location.longitude }}</p>
         }
       </ion-label>
@@ -34,6 +54,34 @@
 </ion-content>
 
 <form class="composer" [formGroup]="messageForm" (ngSubmit)="sendMessage()">
+  <input
+    #fileInput
+    class="file-input"
+    type="file"
+    accept=".pdf,.docx,.zip,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip"
+    (change)="sendFile($event)"
+  />
+  <ion-button type="button" fill="outline" aria-label="Enviar imagen" [disabled]="isSendingMedia" (click)="sendImage()">
+    Imagen
+  </ion-button>
+  <ion-button
+    type="button"
+    fill="outline"
+    aria-label="Adjuntar archivo"
+    [disabled]="isSendingMedia"
+    (click)="chooseFile()"
+  >
+    Archivo
+  </ion-button>
+  <ion-button
+    type="button"
+    fill="outline"
+    aria-label="Compartir ubicación"
+    [disabled]="isSendingMedia"
+    (click)="sendLocation()"
+  >
+    Ubicación
+  </ion-button>
   <ion-item>
     <ion-input label="Mensaje" labelPlacement="stacked" placeholder="Escribe un mensaje" formControlName="text" />
   </ion-item>
