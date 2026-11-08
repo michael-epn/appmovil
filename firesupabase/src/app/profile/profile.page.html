@@ -8,6 +8,10 @@
 
 <ion-content class="ion-padding">
   <main class="profile-card">
+    <ion-item>
+      <ion-label>Modo oscuro</ion-label>
+      <ion-toggle slot="end" [checked]="isDarkMode" (ionChange)="setDarkMode($event.detail.checked)" />
+    </ion-item>
     @if (isLoading) {
     <p>Cargando perfil…</p>
     } @else if (user) {

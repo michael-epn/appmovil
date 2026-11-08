@@ -2,13 +2,16 @@ import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
   addDoc,
+  arrayUnion,
   collection,
   collectionData,
+  deleteDoc,
   doc,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { type Observable } from 'rxjs';
 
@@ -69,5 +72,32 @@ export class ChatService {
       readBy: [senderId],
       createdAt: serverTimestamp(),
     }).then(() => undefined);
+  }
+
+  updateMessageText(roomId: string, messageId: string, text: string): Promise<void> {
+    const message = doc(this.firestore, `rooms/${roomId}/messages/${messageId}`);
+    return updateDoc(message, {
+      text: text.trim(),
+      edited: true,
+    });
+  }
+
+  deleteMessage(roomId: string, messageId: string): Promise<void> {
+    const message = doc(this.firestore, `rooms/${roomId}/messages/${messageId}`);
+    return deleteDoc(message);
+  }
+
+  async toggleReaction(roomId: string, message: Message, emoji: string, userId: string): Promise<void> {
+    const messageRef = doc(this.firestore, `rooms/${roomId}/messages/${message.id}`);
+    const userIds = message.reactions?.[emoji] ?? [];
+    const nextUserIds = userIds.includes(userId) ? userIds.filter((id) => id !== userId) : [...userIds, userId];
+    await updateDoc(messageRef, {
+      [`reactions.${emoji}`]: nextUserIds,
+    });
+  }
+
+  markMessageRead(roomId: string, messageId: string, userId: string): Promise<void> {
+    const message = doc(this.firestore, `rooms/${roomId}/messages/${messageId}`);
+    return updateDoc(message, { readBy: arrayUnion(userId) });
   }
 }

@@ -26,8 +26,8 @@ export interface Message {
   location: MessageLocation | null;
   lat: number | null;
   lng: number | null;
-  reactions: Record<string, string[]>;
+  reactions?: Record<string, string[]>;
   edited: boolean;
-  readBy: string[];
+  readBy?: string[];
   createdAt: Timestamp | null;
 }

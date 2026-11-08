@@ -2,7 +2,13 @@
   <ion-toolbar>
     <ion-button slot="start" fill="clear" (click)="goBack()">Salas</ion-button>
     <ion-title>Conversación</ion-title>
+    <ion-note slot="end">{{ onlineCount }} en línea</ion-note>
   </ion-toolbar>
+  @if (typingUsers.length) {
+  <ion-toolbar>
+    <ion-title size="small">{{ typingUsers.join(', ') }} escribiendo...</ion-title>
+  </ion-toolbar>
+  }
   <ion-toolbar>
     <ion-searchbar [formControl]="searchControl" placeholder="Buscar mensajes"></ion-searchbar>
   </ion-toolbar>
@@ -14,7 +20,12 @@
   } @if (filteredMessages$ | async; as messages) {
   <ion-list lines="none">
     @for (message of messages; track message.id) {
-    <ion-item>
+    <ion-item
+      (pointerdown)="startMessagePress(message)"
+      (pointerup)="cancelMessagePress()"
+      (pointerleave)="cancelMessagePress()"
+      (pointercancel)="cancelMessagePress()"
+    >
       <ion-label class="ion-text-wrap">
         <h3>{{ message.senderName }} @if (message.edited) { <small>(editado)</small> }</h3>
         @if (message.text) {
@@ -44,6 +55,17 @@
         } @if (!message.type && message.location) {
         <p>Ubicación: {{ message.location.latitude }}, {{ message.location.longitude }}</p>
         }
+        <div class="message-actions">
+          @for (emoji of reactionEmojis; track emoji) {
+          <ion-button size="small" fill="clear" (click)="reactToMessage(message, emoji)">
+            {{ emoji }} {{ message.reactions?.[emoji]?.length ?? 0 }}
+          </ion-button>
+          } @if (message.senderId === currentUser?.uid) {
+          <span class="read-receipt" [attr.aria-label]="(message.readBy?.length ?? 0) > 1 ? 'Leído' : 'Enviado'">
+            {{ (message.readBy?.length ?? 0) > 1 ? '✓✓' : '✓' }}
+          </span>
+          }
+        </div>
       </ion-label>
     </ion-item>
     } @empty {
@@ -83,7 +105,13 @@
     Ubicación
   </ion-button>
   <ion-item>
-    <ion-input label="Mensaje" labelPlacement="stacked" placeholder="Escribe un mensaje" formControlName="text" />
+    <ion-input
+      label="Mensaje"
+      labelPlacement="stacked"
+      placeholder="Escribe un mensaje"
+      formControlName="text"
+      (ionInput)="onMessageInput($event.detail.value)"
+    />
   </ion-item>
   <ion-button type="submit" [disabled]="messageForm.invalid">Enviar</ion-button>
 </form>

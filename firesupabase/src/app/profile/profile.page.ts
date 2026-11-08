@@ -2,12 +2,24 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { IonButton, IonContent, IonHeader, IonInput, IonItem, IonTextarea, IonTitle, IonToolbar } from '@ionic/angular';
+import {
+  IonButton,
+  IonContent,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonTextarea,
+  IonTitle,
+  IonToggle,
+  IonToolbar,
+} from '@ionic/angular';
 import { type User } from 'firebase/auth';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
 import { SupabaseService } from '../services/supabase.service';
+import { ThemeService } from '../services/theme.service';
 
 interface Profile {
   username: string;
@@ -26,8 +38,10 @@ interface Profile {
     IonHeader,
     IonInput,
     IonItem,
+    IonLabel,
     IonTextarea,
     IonTitle,
+    IonToggle,
     IonToolbar,
   ],
 })
@@ -36,6 +50,7 @@ export class ProfilePage {
   private readonly authService = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
   private readonly router = inject(Router);
+  private readonly theme = inject(ThemeService);
 
   readonly form = this.formBuilder.nonNullable.group({
     username: ['', [Validators.required, Validators.maxLength(50)]],
@@ -48,11 +63,13 @@ export class ProfilePage {
   isSaving = false;
   errorMessage = '';
   successMessage = '';
+  isDarkMode = false;
 
   async ionViewWillEnter(): Promise<void> {
     this.isLoading = true;
     this.errorMessage = '';
     try {
+      this.isDarkMode = await this.theme.initialize();
       this.user = await firstValueFrom(this.authService.authState$);
       if (!this.user) {
         await this.router.navigateByUrl('/login', { replaceUrl: true });
@@ -173,6 +190,15 @@ export class ProfilePage {
 
   async openRooms(): Promise<void> {
     await this.router.navigateByUrl('/rooms');
+  }
+
+  async setDarkMode(enabled: boolean): Promise<void> {
+    try {
+      await this.theme.setDarkMode(enabled);
+      this.isDarkMode = enabled;
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'No se pudo guardar la preferencia del tema.');
+    }
   }
 
   private async ensureProfile(user: User): Promise<void> {

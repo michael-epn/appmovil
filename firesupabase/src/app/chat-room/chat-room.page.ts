@@ -12,10 +12,14 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonNote,
   IonSearchbar,
   IonTitle,
   IonToolbar,
+  ActionSheetController,
+  AlertController,
 } from '@ionic/angular';
+import { type RealtimeChannel } from '@supabase/supabase-js';
 import { type User } from 'firebase/auth';
 import {
   combineLatest,
@@ -26,6 +30,7 @@ import {
   of,
   startWith,
   switchMap,
+  type Subscription,
   type Observable,
 } from 'rxjs';
 
@@ -48,6 +53,7 @@ import { SupabaseService } from '../services/supabase.service';
     IonItem,
     IonLabel,
     IonList,
+    IonNote,
     IonSearchbar,
     IonTitle,
     IonToolbar,
@@ -61,6 +67,8 @@ export class ChatRoomPage {
   private readonly authService = inject(AuthService);
   private readonly chatService = inject(ChatService);
   private readonly supabase = inject(SupabaseService);
+  private readonly actionSheetController = inject(ActionSheetController);
+  private readonly alertController = inject(AlertController);
 
   readonly searchControl = new FormControl('', { nonNullable: true });
   readonly messageForm = new FormGroup({
@@ -86,6 +94,123 @@ export class ChatRoomPage {
   );
   errorMessage = '';
   isSendingMedia = false;
+  onlineCount = 0;
+  typingUsers: string[] = [];
+  currentUser: User | null = null;
+  readonly reactionEmojis = ['👍', '❤️', '😂'];
+  private presenceChannel?: RealtimeChannel;
+  private readSubscription?: Subscription;
+  private typingTimer?: ReturnType<typeof setTimeout>;
+  private messagePressTimer?: ReturnType<typeof setTimeout>;
+
+  async ionViewWillEnter(): Promise<void> {
+    try {
+      const { roomId, user } = await this.getChatContext();
+      this.currentUser = user;
+      const username = user.displayName ?? user.email ?? 'Usuario';
+      this.presenceChannel = this.supabase.joinRoomPresence(
+        roomId,
+        user.uid,
+        username,
+        ({ onlineCount, typingUsers }) => {
+          this.onlineCount = onlineCount;
+          this.typingUsers = typingUsers;
+        },
+        (error) => {
+          this.errorMessage = this.getErrorMessage(error, 'No se pudo actualizar la presencia.');
+        },
+      );
+      this.readSubscription = this.messages$.subscribe((messages) => {
+        for (const message of messages) {
+          if (message.senderId !== user.uid && !message.readBy?.includes(user.uid)) {
+            void this.chatService.markMessageRead(roomId, message.id, user.uid).catch((error: unknown) => {
+              this.errorMessage = this.getErrorMessage(error, 'No se pudo marcar el mensaje como leído.');
+            });
+          }
+        }
+      });
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'No se pudo conectar a la sala.');
+    }
+  }
+
+  ionViewWillLeave(): void {
+    this.readSubscription?.unsubscribe();
+    this.readSubscription = undefined;
+    if (this.presenceChannel) {
+      void this.supabase.removeRoomPresence(this.presenceChannel).catch((error: unknown) => {
+        this.errorMessage = this.getErrorMessage(error, 'No se pudo salir del canal de presencia.');
+      });
+      this.presenceChannel = undefined;
+    }
+    if (this.typingTimer) {
+      clearTimeout(this.typingTimer);
+    }
+    if (this.messagePressTimer) {
+      clearTimeout(this.messagePressTimer);
+    }
+  }
+
+  onMessageInput(value: string | null | undefined): void {
+    if (!this.presenceChannel || !this.currentUser) {
+      return;
+    }
+    if (this.typingTimer) {
+      clearTimeout(this.typingTimer);
+    }
+    void this.supabase
+      .trackPresence(
+        this.presenceChannel,
+        this.currentUser.displayName ?? this.currentUser.email ?? 'Usuario',
+        !!value?.trim(),
+      )
+      .catch((error: unknown) => {
+        this.errorMessage = this.getErrorMessage(error, 'No se pudo actualizar el estado de escritura.');
+      });
+    this.typingTimer = setTimeout(() => {
+      if (this.presenceChannel && this.currentUser) {
+        void this.supabase
+          .trackPresence(
+            this.presenceChannel,
+            this.currentUser.displayName ?? this.currentUser.email ?? 'Usuario',
+            false,
+          )
+          .catch((error: unknown) => {
+            this.errorMessage = this.getErrorMessage(error, 'No se pudo actualizar el estado de escritura.');
+          });
+      }
+    }, 1200);
+  }
+
+  startMessagePress(message: Message): void {
+    this.cancelMessagePress();
+    if (message.senderId !== this.currentUser?.uid) {
+      return;
+    }
+    this.messagePressTimer = setTimeout(() => {
+      void this.openMessageActions(message);
+      this.messagePressTimer = undefined;
+    }, 500);
+  }
+
+  cancelMessagePress(): void {
+    if (this.messagePressTimer) {
+      clearTimeout(this.messagePressTimer);
+      this.messagePressTimer = undefined;
+    }
+  }
+
+  async reactToMessage(message: Message, emoji: string): Promise<void> {
+    if (!this.currentUser) {
+      return;
+    }
+    try {
+      const roomId = await firstValueFrom(this.roomId$);
+      await this.chatService.toggleReaction(roomId, message, emoji, this.currentUser.uid);
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'No se pudo guardar la reacción.');
+    }
+  }
 
   async sendMessage(): Promise<void> {
     this.errorMessage = '';
@@ -236,6 +361,62 @@ export class ChatRoomPage {
       throw new Error('No se encontró la sala de chat.');
     }
     return { roomId, user };
+  }
+
+  private async openMessageActions(message: Message): Promise<void> {
+    const buttons = [];
+    if (message.text) {
+      buttons.push({ text: 'Editar', handler: () => void this.editMessage(message) });
+    }
+    buttons.push(
+      { text: 'Eliminar', role: 'destructive', handler: () => void this.deleteMessage(message) },
+      { text: 'Cancelar', role: 'cancel' },
+    );
+    const sheet = await this.actionSheetController.create({
+      header: 'Mensaje',
+      buttons,
+    });
+    await sheet.present();
+  }
+
+  private async editMessage(message: Message): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Editar mensaje',
+      inputs: [{ name: 'text', type: 'textarea', value: message.text, attributes: { maxlength: 2000 } }],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: (values: { text?: string }) => {
+            const text = values.text?.trim();
+            if (!text) {
+              return false;
+            }
+            void this.updateMessage(message, text);
+            return true;
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async updateMessage(message: Message, text: string): Promise<void> {
+    try {
+      const roomId = await firstValueFrom(this.roomId$);
+      await this.chatService.updateMessageText(roomId, message.id, text);
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'No se pudo editar el mensaje.');
+    }
+  }
+
+  private async deleteMessage(message: Message): Promise<void> {
+    try {
+      const roomId = await firstValueFrom(this.roomId$);
+      await this.chatService.deleteMessage(roomId, message.id);
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'No se pudo eliminar el mensaje.');
+    }
   }
 
   private getContentType(extension: string): string {
