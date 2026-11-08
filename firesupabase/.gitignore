@@ -22,6 +22,8 @@ log.txt
 /www
 /platforms
 /plugins
+/src/environments/environment.ts
+/src/environments/environment.prod.ts
 
 # Compiled output
 /dist
