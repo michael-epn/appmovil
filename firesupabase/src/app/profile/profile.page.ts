@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -15,7 +15,6 @@ import {
   IonToolbar,
 } from '@ionic/angular';
 import { type User } from 'firebase/auth';
-import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
 import { SupabaseService } from '../services/supabase.service';
@@ -57,21 +56,22 @@ export class ProfilePage {
     bio: ['', [Validators.maxLength(500)]],
   });
 
-  user: User | null = null;
-  avatarUrl: string | null = null;
-  isLoading = true;
-  isSaving = false;
-  errorMessage = '';
-  successMessage = '';
-  isDarkMode = false;
+  readonly user = signal<User | null>(null);
+  readonly avatarUrl = signal<string | null>(null);
+  readonly isLoading = signal(true);
+  readonly isSaving = signal(false);
+  readonly errorMessage = signal('');
+  readonly successMessage = signal('');
+  readonly isDarkMode = signal(false);
 
   async ionViewWillEnter(): Promise<void> {
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
     try {
-      this.isDarkMode = await this.theme.initialize();
-      this.user = await firstValueFrom(this.authService.authState$);
-      if (!this.user) {
+      this.isDarkMode.set(await this.theme.initialize());
+      const user = await this.authService.getCurrentUser();
+      this.user.set(user);
+      if (!user) {
         await this.router.navigateByUrl('/login', { replaceUrl: true });
         return;
       }
@@ -79,7 +79,7 @@ export class ProfilePage {
       const { data, error } = await this.supabase.client
         .from('profiles')
         .select('username, bio, avatar_url')
-        .eq('id', this.user.uid)
+        .eq('id', user.uid)
         .maybeSingle();
 
       if (error) {
@@ -89,33 +89,34 @@ export class ProfilePage {
       if (data) {
         this.setProfile(data);
       } else {
-        await this.ensureProfile(this.user);
+        await this.ensureProfile(user);
       }
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo cargar el perfil.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo cargar el perfil.'));
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
   }
 
   async saveProfile(): Promise<void> {
-    this.errorMessage = '';
-    this.successMessage = '';
-    if (!this.user || this.form.invalid || this.isSaving) {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    const user = this.user();
+    if (!user || this.form.invalid || this.isSaving()) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.isSaving = true;
+    this.isSaving.set(true);
     try {
       const { username, bio } = this.form.getRawValue();
       const { error } = await this.supabase.client.from('profiles').upsert(
         {
-          id: this.user.uid,
-          email: this.user.email,
+          id: user.uid,
+          email: user.email,
           username: username.trim(),
           bio: bio.trim(),
-          avatar_url: this.avatarUrl,
+          avatar_url: this.avatarUrl(),
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'id' },
@@ -123,21 +124,23 @@ export class ProfilePage {
       if (error) {
         throw error;
       }
-      this.successMessage = 'Perfil actualizado.';
+      this.successMessage.set('Perfil actualizado.');
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo guardar el perfil.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo guardar el perfil.'));
     } finally {
-      this.isSaving = false;
+      this.isSaving.set(false);
     }
   }
 
   async chooseAvatar(): Promise<void> {
-    this.errorMessage = '';
-    this.successMessage = '';
-    if (!this.user) {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    const user = this.user();
+    if (!user) {
       return;
     }
 
+    this.isSaving.set(true);
     try {
       const photo = await Camera.getPhoto({
         source: CameraSource.Photos,
@@ -156,7 +159,7 @@ export class ProfilePage {
       }
       const image = await response.blob();
       const extension = image.type.split('/')[1] || 'jpg';
-      const filePath = `${this.user.uid}/${crypto.randomUUID()}.${extension}`;
+      const filePath = `${user.uid}/${crypto.randomUUID()}.${extension}`;
       const { error: uploadError } = await this.supabase.client.storage
         .from('avatars')
         .upload(filePath, image, { contentType: image.type || 'image/jpeg', upsert: true });
@@ -168,14 +171,16 @@ export class ProfilePage {
       const { error: profileError } = await this.supabase.client
         .from('profiles')
         .update({ avatar_url: data.publicUrl, updated_at: new Date().toISOString() })
-        .eq('id', this.user.uid);
+        .eq('id', user.uid);
       if (profileError) {
         throw profileError;
       }
-      this.avatarUrl = data.publicUrl;
-      this.successMessage = 'Foto de perfil actualizada.';
+      this.avatarUrl.set(data.publicUrl);
+      this.successMessage.set('Foto de perfil actualizada.');
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo subir la foto de perfil.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo subir la foto de perfil.'));
+    } finally {
+      this.isSaving.set(false);
     }
   }
 
@@ -184,16 +189,16 @@ export class ProfilePage {
       await this.authService.signOut();
       await this.router.navigateByUrl('/login', { replaceUrl: true });
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo cerrar la sesión.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo cerrar la sesión.'));
     }
   }
 
   async setDarkMode(enabled: boolean): Promise<void> {
     try {
       await this.theme.setDarkMode(enabled);
-      this.isDarkMode = enabled;
+      this.isDarkMode.set(enabled);
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo guardar la preferencia del tema.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo guardar la preferencia del tema.'));
     }
   }
 
@@ -222,7 +227,7 @@ export class ProfilePage {
 
   private setProfile(profile: Profile): void {
     this.form.patchValue({ username: profile.username ?? '', bio: profile.bio ?? '' });
-    this.avatarUrl = profile.avatar_url;
+    this.avatarUrl.set(profile.avatar_url);
   }
 
   private getErrorMessage(error: unknown, fallback: string): string {

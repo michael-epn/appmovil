@@ -22,9 +22,9 @@
     <p>Entra a una sala o crea una para empezar a conversar.</p>
   </div>
 
-  @if (errorMessage) {
-  <p class="error-message" role="alert">{{ errorMessage }}</p>
-  } @if (isLoading) {
+  @if (errorMessage()) {
+  <p class="error-message" role="alert">{{ errorMessage() }}</p>
+  } @if (isLoading()) {
   <ion-list class="rooms-list">
     @for (placeholder of [1, 2, 3, 4]; track placeholder) {
     <ion-item class="room-item">
@@ -36,9 +36,9 @@
     </ion-item>
     }
   </ion-list>
-  } @else if (filteredRooms$ | async; as rooms) { @if (rooms.length) {
+  } @else { @if (filteredRooms().length) {
   <ion-list class="rooms-list">
-    @for (room of rooms; track room.id) {
+    @for (room of filteredRooms(); track room.id) {
     <ion-item class="room-item" button detail="false" (click)="openRoom(room.id)">
       <ion-avatar slot="start" class="room-avatar">
         <span>{{ room.name.charAt(0).toLocaleUpperCase() }}</span>
@@ -54,12 +54,12 @@
   } @else {
   <section class="empty-state">
     <div class="empty-icon"><ion-icon name="chatbubbles-outline"></ion-icon></div>
-    <h2>{{ searchControl.value ? 'No encontramos esa sala' : 'Tu primera conversación empieza aquí' }}</h2>
+    <h2>{{ searchTerm() ? 'No encontramos esa sala' : 'Tu primera conversación empieza aquí' }}</h2>
     <p>
-      {{ searchControl.value ? 'Prueba con otro nombre o crea una sala nueva.' : 'Crea una sala e invita a tu comunidad
-      a conversar.' }}
+      {{ searchTerm() ? 'Prueba con otro nombre o crea una sala nueva.' : 'Crea una sala e invita a tu comunidad a
+      conversar.' }}
     </p>
-    @if (!searchControl.value) {
+    @if (!searchTerm()) {
     <ion-button (click)="openCreateRoomAlert()">Crear una sala</ion-button>
     }
   </section>

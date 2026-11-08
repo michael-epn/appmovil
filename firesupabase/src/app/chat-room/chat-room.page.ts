@@ -1,5 +1,5 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
-import { Component, inject, type ElementRef, ViewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, computed, inject, signal, type ElementRef, type OnDestroy, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Camera, CameraResultType } from '@capacitor/camera';
@@ -29,14 +29,11 @@ import {
   send,
 } from 'ionicons/icons';
 import {
-  combineLatest,
   debounceTime,
   distinctUntilChanged,
   firstValueFrom,
   map,
-  of,
   startWith,
-  switchMap,
   type Subscription,
   type Observable,
 } from 'rxjs';
@@ -51,7 +48,6 @@ import { SupabaseService } from '../services/supabase.service';
   templateUrl: './chat-room.page.html',
   styleUrl: './chat-room.page.scss',
   imports: [
-    AsyncPipe,
     DatePipe,
     ReactiveFormsModule,
     IonButton,
@@ -65,7 +61,7 @@ import { SupabaseService } from '../services/supabase.service';
     IonToolbar,
   ],
 })
-export class ChatRoomPage {
+export class ChatRoomPage implements OnDestroy {
   @ViewChild('fileInput') private fileInput?: ElementRef<HTMLInputElement>;
 
   private readonly route = inject(ActivatedRoute);
@@ -84,72 +80,97 @@ export class ChatRoomPage {
     map((params) => params.get('roomId') ?? ''),
     distinctUntilChanged(),
   );
-  readonly messages$: Observable<Message[]> = this.roomId$.pipe(
-    switchMap((roomId) => (roomId ? this.chatService.listenMessages(roomId) : of([]))),
-  );
-  readonly filteredMessages$: Observable<Message[]> = combineLatest([
-    this.messages$,
-    this.searchControl.valueChanges.pipe(startWith(this.searchControl.value), debounceTime(250)),
-  ]).pipe(
-    map(([messages, term]) => {
-      const searchTerm = term.trim().toLocaleLowerCase();
-      return searchTerm
-        ? messages.filter((message) => message.text.toLocaleLowerCase().includes(searchTerm))
-        : messages;
-    }),
-  );
-  errorMessage = '';
-  isSendingMedia = false;
-  onlineCount = 0;
-  typingUsers: string[] = [];
-  currentUser: User | null = null;
+  readonly messages = signal<Message[]>([]);
+  readonly searchTerm = signal('');
+  readonly filteredMessages = computed(() => {
+    const searchTerm = this.searchTerm().trim().toLocaleLowerCase();
+    return searchTerm
+      ? this.messages().filter((message) => message.text.toLocaleLowerCase().includes(searchTerm))
+      : this.messages();
+  });
+  readonly errorMessage = signal('');
+  readonly isLoading = signal(true);
+  readonly isSendingMedia = signal(false);
+  readonly onlineCount = signal(0);
+  readonly typingUsers = signal<string[]>([]);
+  readonly currentUser = signal<User | null>(null);
   readonly reactionEmojis = ['👍', '❤️', '😂'];
   private presenceChannel?: RealtimeChannel;
   private readSubscription?: Subscription;
+  private searchSubscription?: Subscription;
   private typingTimer?: ReturnType<typeof setTimeout>;
   private messagePressTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
     addIcons({ addCircleOutline, checkmarkDoneOutline, documentTextOutline, imageOutline, locationOutline, send });
+    this.searchSubscription = this.searchControl.valueChanges
+      .pipe(startWith(this.searchControl.value), debounceTime(250))
+      .subscribe((term) => this.searchTerm.set(term));
   }
 
   async ionViewWillEnter(): Promise<void> {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.readSubscription?.unsubscribe();
     try {
       const { roomId, user } = await this.getChatContext();
-      this.currentUser = user;
+      this.currentUser.set(user);
       const username = user.displayName ?? user.email ?? 'Usuario';
       this.presenceChannel = this.supabase.joinRoomPresence(
         roomId,
         user.uid,
         username,
         ({ onlineCount, typingUsers }) => {
-          this.onlineCount = onlineCount;
-          this.typingUsers = typingUsers;
+          this.onlineCount.set(onlineCount);
+          this.typingUsers.set(typingUsers);
         },
         (error) => {
-          this.errorMessage = this.getErrorMessage(error, 'No se pudo actualizar la presencia.');
+          this.errorMessage.set(this.getErrorMessage(error, 'No se pudo actualizar la presencia.'));
         },
       );
-      this.readSubscription = this.messages$.subscribe((messages) => {
-        for (const message of messages) {
-          if (message.senderId !== user.uid && !message.readBy?.includes(user.uid)) {
-            void this.chatService.markMessageRead(roomId, message.id, user.uid).catch((error: unknown) => {
-              this.errorMessage = this.getErrorMessage(error, 'No se pudo marcar el mensaje como leído.');
-            });
-          }
-        }
+      await new Promise<void>((resolve, reject) => {
+        let receivedInitialMessages = false;
+        this.readSubscription = this.chatService.listenMessages(roomId).subscribe({
+          next: (messages) => {
+            this.messages.set(messages);
+            for (const message of messages) {
+              if (message.senderId !== user.uid && !message.readBy?.includes(user.uid)) {
+                void this.chatService.markMessageRead(roomId, message.id, user.uid).catch((error: unknown) => {
+                  this.errorMessage.set(this.getErrorMessage(error, 'No se pudo marcar el mensaje como leído.'));
+                });
+              }
+            }
+            if (!receivedInitialMessages) {
+              receivedInitialMessages = true;
+              resolve();
+            }
+          },
+          error: (error: unknown) => {
+            if (!receivedInitialMessages) {
+              reject(error);
+            } else {
+              this.errorMessage.set(this.getErrorMessage(error, 'No se pudieron cargar los mensajes.'));
+            }
+          },
+        });
       });
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo conectar a la sala.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo conectar a la sala.'));
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
   ionViewWillLeave(): void {
     this.readSubscription?.unsubscribe();
     this.readSubscription = undefined;
+    this.currentUser.set(null);
+    this.messages.set([]);
+    this.onlineCount.set(0);
+    this.typingUsers.set([]);
     if (this.presenceChannel) {
       void this.supabase.removeRoomPresence(this.presenceChannel).catch((error: unknown) => {
-        this.errorMessage = this.getErrorMessage(error, 'No se pudo salir del canal de presencia.');
+        this.errorMessage.set(this.getErrorMessage(error, 'No se pudo salir del canal de presencia.'));
       });
       this.presenceChannel = undefined;
     }
@@ -161,32 +182,31 @@ export class ChatRoomPage {
     }
   }
 
+  ngOnDestroy(): void {
+    this.readSubscription?.unsubscribe();
+    this.searchSubscription?.unsubscribe();
+  }
+
   onMessageInput(value: string | null | undefined): void {
-    if (!this.presenceChannel || !this.currentUser) {
+    const currentUser = this.currentUser();
+    if (!this.presenceChannel || !currentUser) {
       return;
     }
     if (this.typingTimer) {
       clearTimeout(this.typingTimer);
     }
     void this.supabase
-      .trackPresence(
-        this.presenceChannel,
-        this.currentUser.displayName ?? this.currentUser.email ?? 'Usuario',
-        !!value?.trim(),
-      )
+      .trackPresence(this.presenceChannel, currentUser.displayName ?? currentUser.email ?? 'Usuario', !!value?.trim())
       .catch((error: unknown) => {
-        this.errorMessage = this.getErrorMessage(error, 'No se pudo actualizar el estado de escritura.');
+        this.errorMessage.set(this.getErrorMessage(error, 'No se pudo actualizar el estado de escritura.'));
       });
     this.typingTimer = setTimeout(() => {
-      if (this.presenceChannel && this.currentUser) {
+      const currentUser = this.currentUser();
+      if (this.presenceChannel && currentUser) {
         void this.supabase
-          .trackPresence(
-            this.presenceChannel,
-            this.currentUser.displayName ?? this.currentUser.email ?? 'Usuario',
-            false,
-          )
+          .trackPresence(this.presenceChannel, currentUser.displayName ?? currentUser.email ?? 'Usuario', false)
           .catch((error: unknown) => {
-            this.errorMessage = this.getErrorMessage(error, 'No se pudo actualizar el estado de escritura.');
+            this.errorMessage.set(this.getErrorMessage(error, 'No se pudo actualizar el estado de escritura.'));
           });
       }
     }, 1200);
@@ -194,7 +214,7 @@ export class ChatRoomPage {
 
   startMessagePress(message: Message): void {
     this.cancelMessagePress();
-    if (message.senderId !== this.currentUser?.uid) {
+    if (message.senderId !== this.currentUser()?.uid) {
       return;
     }
     this.messagePressTimer = setTimeout(() => {
@@ -211,29 +231,27 @@ export class ChatRoomPage {
   }
 
   async reactToMessage(message: Message, emoji: string): Promise<void> {
-    if (!this.currentUser) {
+    const currentUser = this.currentUser();
+    if (!currentUser) {
       return;
     }
     try {
       const roomId = await firstValueFrom(this.roomId$);
-      await this.chatService.toggleReaction(roomId, message, emoji, this.currentUser.uid);
+      await this.chatService.toggleReaction(roomId, message, emoji, currentUser.uid);
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo guardar la reacción.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo guardar la reacción.'));
     }
   }
 
   async sendMessage(): Promise<void> {
-    this.errorMessage = '';
+    this.errorMessage.set('');
     if (this.messageForm.invalid) {
       this.messageForm.markAllAsTouched();
       return;
     }
 
     try {
-      const [roomId, user] = await Promise.all([
-        firstValueFrom(this.roomId$),
-        firstValueFrom(this.authService.authState$),
-      ]);
+      const [roomId, user] = await Promise.all([firstValueFrom(this.roomId$), this.authService.getCurrentUser()]);
       if (!user) {
         await this.router.navigateByUrl('/login', { replaceUrl: true });
         return;
@@ -243,13 +261,13 @@ export class ChatRoomPage {
       await this.chatService.sendMessage(roomId, user.uid, user.displayName ?? user.email ?? 'Usuario', text);
       this.messageForm.reset();
     } catch (error) {
-      this.errorMessage = error instanceof Error ? error.message : 'No se pudo enviar el mensaje.';
+      this.errorMessage.set(error instanceof Error ? error.message : 'No se pudo enviar el mensaje.');
     }
   }
 
   async sendImage(): Promise<void> {
-    this.errorMessage = '';
-    this.isSendingMedia = true;
+    this.errorMessage.set('');
+    this.isSendingMedia.set(true);
     try {
       const photo = await Camera.getPhoto({
         quality: 80,
@@ -279,9 +297,9 @@ export class ChatRoomPage {
         'image',
       );
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo enviar la imagen.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo enviar la imagen.'));
     } finally {
-      this.isSendingMedia = false;
+      this.isSendingMedia.set(false);
     }
   }
 
@@ -296,15 +314,15 @@ export class ChatRoomPage {
       return;
     }
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
     const extension = file.name.split('.').pop()?.toLowerCase();
     const allowedTypes = new Set(['pdf', 'docx', 'zip']);
     if (!extension || !allowedTypes.has(extension)) {
-      this.errorMessage = 'Solo se permiten archivos PDF, DOCX o ZIP.';
+      this.errorMessage.set('Solo se permiten archivos PDF, DOCX o ZIP.');
       return;
     }
 
-    this.isSendingMedia = true;
+    this.isSendingMedia.set(true);
     try {
       const { roomId, user } = await this.getChatContext();
       const path = `${user.uid}/${roomId}/${crypto.randomUUID()}.${extension}`;
@@ -321,15 +339,15 @@ export class ChatRoomPage {
         file.name,
       );
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo enviar el archivo.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo enviar el archivo.'));
     } finally {
-      this.isSendingMedia = false;
+      this.isSendingMedia.set(false);
     }
   }
 
   async sendLocation(): Promise<void> {
-    this.errorMessage = '';
-    this.isSendingMedia = true;
+    this.errorMessage.set('');
+    this.isSendingMedia.set(true);
     try {
       const position = await Geolocation.getCurrentPosition();
       const { roomId, user } = await this.getChatContext();
@@ -344,9 +362,9 @@ export class ChatRoomPage {
         'location',
       );
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo compartir la ubicación.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo compartir la ubicación.'));
     } finally {
-      this.isSendingMedia = false;
+      this.isSendingMedia.set(false);
     }
   }
 
@@ -359,10 +377,7 @@ export class ChatRoomPage {
   }
 
   private async getChatContext(): Promise<{ roomId: string; user: User }> {
-    const [roomId, user] = await Promise.all([
-      firstValueFrom(this.roomId$),
-      firstValueFrom(this.authService.authState$),
-    ]);
+    const [roomId, user] = await Promise.all([firstValueFrom(this.roomId$), this.authService.getCurrentUser()]);
     if (!user) {
       await this.router.navigateByUrl('/login', { replaceUrl: true });
       throw new Error('Inicia sesión para enviar mensajes.');
@@ -416,7 +431,7 @@ export class ChatRoomPage {
       const roomId = await firstValueFrom(this.roomId$);
       await this.chatService.updateMessageText(roomId, message.id, text);
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo editar el mensaje.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo editar el mensaje.'));
     }
   }
 
@@ -425,7 +440,7 @@ export class ChatRoomPage {
       const roomId = await firstValueFrom(this.roomId$);
       await this.chatService.deleteMessage(roomId, message.id);
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'No se pudo eliminar el mensaje.');
+      this.errorMessage.set(this.getErrorMessage(error, 'No se pudo eliminar el mensaje.'));
     }
   }
 

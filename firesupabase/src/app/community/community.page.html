@@ -11,9 +11,9 @@
     <p>Encuentra a la comunidad y descubre quién está en línea.</p>
   </header>
 
-  @if (errorMessage) {
-  <p class="error-message" role="alert">{{ errorMessage }}</p>
-  } @if (isLoading) {
+  @if (errorMessage()) {
+  <p class="error-message" role="alert">{{ errorMessage() }}</p>
+  } @if (isLoading()) {
   <ion-list class="people-list">
     @for (placeholder of [1, 2, 3, 4]; track placeholder) {
     <ion-item>
@@ -25,9 +25,9 @@
     </ion-item>
     }
   </ion-list>
-  } @else if (profiles.length) {
+  } @else if (profiles().length) {
   <ion-list class="people-list">
-    @for (profile of profiles; track profile.id) {
+    @for (profile of profiles(); track profile.id) {
     <ion-item>
       <ion-avatar slot="start">
         @if (profile.avatar_url) {

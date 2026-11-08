@@ -1,5 +1,4 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -22,17 +21,7 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { addOutline, chatbubblesOutline } from 'ionicons/icons';
-import {
-  catchError,
-  combineLatest,
-  debounceTime,
-  firstValueFrom,
-  map,
-  of,
-  startWith,
-  tap,
-  type Observable,
-} from 'rxjs';
+import { debounceTime, firstValueFrom, startWith, take, type Subscription } from 'rxjs';
 
 import { type Room } from '../models/chat.models';
 import { AuthService } from '../services/auth.service';
@@ -43,7 +32,6 @@ import { ChatService } from '../services/chat.service';
   templateUrl: './rooms.page.html',
   styleUrl: './rooms.page.scss',
   imports: [
-    AsyncPipe,
     ReactiveFormsModule,
     IonAvatar,
     IonBadge,
@@ -69,30 +57,57 @@ export class RoomsPage {
   private readonly router = inject(Router);
 
   readonly searchControl = new FormControl('', { nonNullable: true });
-  readonly rooms$: Observable<Room[]> = this.chatService.listenRooms().pipe(
-    tap(() => {
-      this.isLoading = false;
-    }),
-    catchError((error: unknown) => {
-      this.errorMessage = error instanceof Error ? error.message : 'No se pudieron cargar las salas.';
-      this.isLoading = false;
-      return of([]);
-    }),
-  );
-  readonly filteredRooms$: Observable<Room[]> = combineLatest([
-    this.rooms$,
-    this.searchControl.valueChanges.pipe(startWith(this.searchControl.value), debounceTime(250)),
-  ]).pipe(
-    map(([rooms, term]) => {
-      const searchTerm = term.trim().toLocaleLowerCase();
-      return searchTerm ? rooms.filter((room) => room.name.toLocaleLowerCase().includes(searchTerm)) : rooms;
-    }),
-  );
-  errorMessage = '';
-  isLoading = true;
+  readonly rooms = signal<Room[]>([]);
+  readonly searchTerm = signal('');
+  readonly filteredRooms = computed(() => {
+    const searchTerm = this.searchTerm().trim().toLocaleLowerCase();
+    return searchTerm
+      ? this.rooms().filter((room) => room.name.toLocaleLowerCase().includes(searchTerm))
+      : this.rooms();
+  });
+  readonly errorMessage = signal('');
+  readonly isLoading = signal(true);
+  private roomsSubscription?: Subscription;
 
   constructor() {
     addIcons({ addOutline, chatbubblesOutline });
+    this.searchControl.valueChanges
+      .pipe(startWith(this.searchControl.value), debounceTime(250))
+      .subscribe((term) => this.searchTerm.set(term));
+  }
+
+  async ionViewWillEnter(): Promise<void> {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.roomsSubscription?.unsubscribe();
+    this.roomsSubscription = undefined;
+
+    try {
+      const user = await this.authService.getCurrentUser();
+      if (!user) {
+        this.rooms.set([]);
+        await this.router.navigateByUrl('/login', { replaceUrl: true });
+        return;
+      }
+
+      const rooms$ = this.chatService.listenRooms();
+      this.rooms.set(await firstValueFrom(rooms$.pipe(take(1))));
+      this.roomsSubscription = rooms$.subscribe({
+        next: (rooms) => this.rooms.set(rooms),
+        error: (error: unknown) => {
+          this.errorMessage.set(error instanceof Error ? error.message : 'No se pudieron cargar las salas.');
+        },
+      });
+    } catch (error) {
+      this.errorMessage.set(error instanceof Error ? error.message : 'No se pudieron cargar las salas.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  ionViewWillLeave(): void {
+    this.roomsSubscription?.unsubscribe();
+    this.roomsSubscription = undefined;
   }
 
   async openCreateRoomAlert(): Promise<void> {
@@ -124,22 +139,22 @@ export class RoomsPage {
   }
 
   private async createRoom(name: string, description: string): Promise<boolean> {
-    this.errorMessage = '';
-    const user = await firstValueFrom(this.authService.authState$);
-    if (!user) {
-      this.errorMessage = 'Inicia sesión para crear una sala.';
-      return false;
-    }
+    this.errorMessage.set('');
     if (!name.trim()) {
-      this.errorMessage = 'El nombre de la sala es obligatorio.';
+      this.errorMessage.set('El nombre de la sala es obligatorio.');
       return false;
     }
 
     try {
+      const user = await this.authService.getCurrentUser();
+      if (!user) {
+        this.errorMessage.set('Inicia sesión para crear una sala.');
+        return false;
+      }
       await this.chatService.createRoom(name, description, user.uid);
       return true;
     } catch (error) {
-      this.errorMessage = error instanceof Error ? error.message : 'No se pudo crear la sala.';
+      this.errorMessage.set(error instanceof Error ? error.message : 'No se pudo crear la sala.');
       return false;
     }
   }

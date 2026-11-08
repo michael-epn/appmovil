@@ -17,16 +17,16 @@
     </header>
     <ion-item>
       <ion-label>Modo oscuro</ion-label>
-      <ion-toggle slot="end" [checked]="isDarkMode" (ionChange)="setDarkMode($event.detail.checked)" />
+      <ion-toggle slot="end" [checked]="isDarkMode()" (ionChange)="setDarkMode($event.detail.checked)" />
     </ion-item>
-    @if (isLoading) {
+    @if (isLoading()) {
     <p>Cargando perfil…</p>
-    } @else if (user) {
-    <p class="email">{{ user.email }}</p>
+    } @else if (user(); as profileUser) {
+    <p class="email">{{ profileUser.email }}</p>
 
     <div class="avatar">
-      @if (avatarUrl) {
-      <img [src]="avatarUrl" alt="Foto de perfil" />
+      @if (avatarUrl()) {
+      <img [src]="avatarUrl()" alt="Foto de perfil" />
       } @else {
       <span>Sin foto</span>
       }
@@ -51,14 +51,14 @@
         />
       </ion-item>
 
-      @if (errorMessage) {
-      <p class="field-error" role="alert">{{ errorMessage }}</p>
-      } @if (successMessage) {
-      <p class="success-message" role="status">{{ successMessage }}</p>
+      @if (errorMessage()) {
+      <p class="field-error" role="alert">{{ errorMessage() }}</p>
+      } @if (successMessage()) {
+      <p class="success-message" role="status">{{ successMessage() }}</p>
       }
 
-      <ion-button expand="block" type="submit" [disabled]="isSaving">
-        {{ isSaving ? 'Guardando…' : 'Guardar perfil' }}
+      <ion-button expand="block" type="submit" [disabled]="isSaving()">
+        {{ isSaving() ? 'Guardando…' : 'Guardar perfil' }}
       </ion-button>
     </form>
     }

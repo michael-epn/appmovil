@@ -7,7 +7,7 @@ import {
   signOut,
 } from '@angular/fire/auth';
 import { type User, type UserCredential } from 'firebase/auth';
-import { type Observable } from 'rxjs';
+import { firstValueFrom, type Observable } from 'rxjs';
 
 import { SupabaseService } from './supabase.service';
 
@@ -19,6 +19,10 @@ export class AuthService {
   private readonly supabase = inject(SupabaseService);
 
   readonly authState$: Observable<User | null> = authState(this.auth);
+
+  getCurrentUser(): Promise<User | null> {
+    return firstValueFrom(authState(this.auth));
+  }
 
   signIn(email: string, password: string): Promise<UserCredential> {
     return signInWithEmailAndPassword(this.auth, email, password);
