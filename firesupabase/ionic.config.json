@@ -1,0 +1,7 @@
+{
+  "name": "firesupabase",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
