@@ -1,19 +1,20 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import {
   Firestore,
+  type Query,
   addDoc,
   arrayUnion,
   collection,
-  collectionData,
   deleteDoc,
   doc,
+  onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
   updateDoc,
 } from '@angular/fire/firestore';
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { type Message, type MessageLocation, type MessageType, type Room } from '../models/chat.models';
 
@@ -22,11 +23,31 @@ import { type Message, type MessageLocation, type MessageType, type Room } from 
 })
 export class ChatService {
   private readonly firestore = inject(Firestore);
+  private readonly ngZone = inject(NgZone);
+
+  private collectionToObservable<T>(q: Query): Observable<T[]> {
+    return new Observable<T[]>((subscriber) => {
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const items = snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data(),
+          })) as T[];
+          this.ngZone.run(() => subscriber.next(items));
+        },
+        (error) => {
+          this.ngZone.run(() => subscriber.error(error));
+        }
+      );
+      return () => unsubscribe();
+    });
+  }
 
   listenRooms(): Observable<Room[]> {
     const roomsCollection = collection(this.firestore, 'rooms');
     const roomsQuery = query(roomsCollection, orderBy('createdAt', 'desc'));
-    return collectionData(roomsQuery, { idField: 'id' }) as Observable<Room[]>;
+    return this.collectionToObservable<Room>(roomsQuery);
   }
 
   async createRoom(name: string, description: string, createdBy: string): Promise<string> {
@@ -44,7 +65,8 @@ export class ChatService {
 
   listenMessages(roomId: string): Observable<Message[]> {
     const messages = collection(this.firestore, `rooms/${roomId}/messages`);
-    return collectionData(query(messages, orderBy('createdAt', 'asc')), { idField: 'id' }) as Observable<Message[]>;
+    const messagesQuery = query(messages, orderBy('createdAt', 'asc'));
+    return this.collectionToObservable<Message>(messagesQuery);
   }
 
   sendMessage(
