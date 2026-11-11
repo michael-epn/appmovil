@@ -59,16 +59,34 @@ export class CandidatosPage implements OnInit {
     }
   }
 
-  formatearFecha(valor: string | Date | Timestamp): string {
-    const fecha =
-      valor instanceof Timestamp
-        ? valor.toDate()
-        : typeof valor === 'string'
-          ? new Date(valor)
-          : valor;
+  formatearFecha(valor: string | Date | Timestamp | any): string {
+    if (!valor) return '';
+    if (typeof valor === 'string') {
+      const fechaCorta = valor.split('T')[0];
+      const partes = fechaCorta.split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      const fechaFallback = new Date(valor);
+      if (isNaN(fechaFallback.getTime())) {
+        return valor;
+      }
+      valor = fechaFallback;
+    }
 
-    return Number.isNaN(fecha.getTime())
-      ? String(valor)
-      : fecha.toLocaleString();
+    let fechaDate: Date;
+
+    if (valor && typeof valor.toDate === 'function') {
+      fechaDate = valor.toDate();
+    } else if (valor instanceof Date) {
+      fechaDate = valor;
+    } else {
+      return String(valor);
+    }
+    const dia = fechaDate.getDate().toString().padStart(2, '0');
+    const mes = (fechaDate.getMonth() + 1).toString().padStart(2, '0');
+    const anio = fechaDate.getFullYear();
+
+    return `${dia}/${mes}/${anio}`;
   }
 }

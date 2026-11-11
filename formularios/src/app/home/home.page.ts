@@ -179,7 +179,7 @@ export class HomePage {
       nombres: valores.nombres.trim(),
       correo: valores.correo.trim(),
       telefono: valores.telefono.trim(),
-      fechaNacimiento: valores.fechaNacimiento,
+      fechaNacimiento: valores.fechaNacimiento.split('T')[0],
       cargo: valores.cargo,
       nivelAcademico: valores.nivelAcademico,
       experienciaAnios: valores.experienciaAnios,
@@ -187,7 +187,7 @@ export class HomePage {
       habilidades: this.habilidadesOpciones.filter(
         (_, indice) => valores.habilidades[indice]
       ),
-      fechaDisponibilidad: valores.fechaDisponibilidad,
+      fechaDisponibilidad: valores.fechaDisponibilidad.split('T')[0],
       aspiracionSalarial: valores.aspiracionSalarial,
       resumen: valores.resumen.trim(),
       consentimiento: valores.consentimiento,

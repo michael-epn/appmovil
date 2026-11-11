@@ -4,13 +4,13 @@ export interface Candidato {
   nombres: string;
   correo: string;
   telefono: string;
-  fechaNacimiento: string | Date;
+  fechaNacimiento: string;
   cargo: string;
   nivelAcademico: string;
   experienciaAnios: number;
   modalidad: string;
   habilidades: string[];
-  fechaDisponibilidad: string | Date;
+  fechaDisponibilidad: string;
   aspiracionSalarial: number;
   resumen: string;
   consentimiento: boolean;
