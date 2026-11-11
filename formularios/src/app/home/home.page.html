@@ -134,10 +134,24 @@
                 </div>
                 <div
                   class="error-message"
-                  *ngIf="formulario.controls.fechaNacimiento.touched && formulario.controls.fechaNacimiento.hasError('fechaFutura')"
+                  *ngIf="formulario.controls.fechaNacimiento.touched && formulario.controls.fechaNacimiento.hasError('fechaFutura') && !formulario.controls.fechaNacimiento.hasError('fechaNacimientoInvalida')"
                   role="alert"
                 >
                   La fecha de nacimiento no puede ser futura.
+                </div>
+                <div
+                  class="error-message"
+                  *ngIf="formulario.controls.fechaNacimiento.touched && formulario.controls.fechaNacimiento.hasError('fechaNacimientoInvalida')"
+                  role="alert"
+                >
+                  Ingresa una fecha de nacimiento válida.
+                </div>
+                <div
+                  class="error-message"
+                  *ngIf="formulario.controls.fechaNacimiento.touched && formulario.controls.fechaNacimiento.hasError('menorDeEdad')"
+                  role="alert"
+                >
+                  Debes tener al menos 18 años para registrarte.
                 </div>
               </div>
             </div>

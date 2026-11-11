@@ -103,6 +103,52 @@ export class HomePage {
     return fecha && fecha.slice(0, 10) > this.hoy ? { fechaFutura: true } : null;
   };
 
+  private readonly edadMinimaValida: ValidatorFn = control => {
+    const valor = control.value;
+    if (valor === '' || valor === null || valor === undefined) {
+      return null;
+    }
+
+    if (typeof valor !== 'string') {
+      return { fechaNacimientoInvalida: true };
+    }
+
+    const partes = /^(\d{4})-(\d{2})-(\d{2})(?:T.*)?$/.exec(valor);
+    if (!partes || (valor.length > 10 && Number.isNaN(Date.parse(valor)))) {
+      return { fechaNacimientoInvalida: true };
+    }
+
+    const [, anioTexto, mesTexto, diaTexto] = partes;
+    const anioNacimiento = Number(anioTexto);
+    const mesNacimiento = Number(mesTexto);
+    const diaNacimiento = Number(diaTexto);
+    const fechaNacimiento = new Date(0);
+    fechaNacimiento.setUTCFullYear(
+      anioNacimiento,
+      mesNacimiento - 1,
+      diaNacimiento
+    );
+
+    if (
+      fechaNacimiento.getUTCFullYear() !== anioNacimiento ||
+      fechaNacimiento.getUTCMonth() !== mesNacimiento - 1 ||
+      fechaNacimiento.getUTCDate() !== diaNacimiento
+    ) {
+      return { fechaNacimientoInvalida: true };
+    }
+
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - anioNacimiento;
+    if (
+      hoy.getMonth() + 1 < mesNacimiento ||
+      (hoy.getMonth() + 1 === mesNacimiento && hoy.getDate() < diaNacimiento)
+    ) {
+      edad--;
+    }
+
+    return edad >= 18 ? null : { menorDeEdad: true };
+  };
+
   private readonly fechaDisponibilidadValida: ValidatorFn = control => {
     const fecha = control.value as string;
     return fecha && fecha.slice(0, 10) < this.hoy ? { fechaPasada: true } : null;
@@ -125,7 +171,14 @@ export class HomePage {
         Validators.pattern(/^(?=(?:\D*\d){7,15}\D*$)\+?[\d\s()-]+$/)
       ]
     ],
-    fechaNacimiento: ['', [Validators.required, this.fechaNacimientoValida]],
+    fechaNacimiento: [
+      '',
+      [
+        Validators.required,
+        this.fechaNacimientoValida,
+        this.edadMinimaValida
+      ]
+    ],
     cargo: ['', Validators.required],
     nivelAcademico: ['', Validators.required],
     experienciaAnios: this.fb.control<number | null>(null, [
