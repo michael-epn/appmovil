@@ -1,0 +1,11 @@
+.loading-state {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 32px;
+}
+
+.candidate-details {
+  padding-bottom: 12px;
+  background: var(--ion-color-light);
+}

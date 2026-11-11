@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
   collection,
+  getDocs,
   serverTimestamp
 } from 'firebase/firestore';
 import { Candidato } from '../models/candidato';
@@ -16,5 +17,10 @@ export class CandidatosService {
       ...candidato,
       creadoEn: serverTimestamp()
     });
+  }
+
+  async obtenerCandidatos(): Promise<Candidato[]> {
+    const snapshot = await getDocs(collection(this.firestore, 'candidatos'));
+    return snapshot.docs.map(documento => documento.data() as Candidato);
   }
 }

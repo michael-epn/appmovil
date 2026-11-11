@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   FormArray,
   FormBuilder,
@@ -44,6 +45,7 @@ import { CandidatosService } from '../services/candidatos.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
     IonButton,
     IonCard,
     IonCardContent,
