@@ -1,0 +1,81 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Oráculo Elemental</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <section class="intro-panel glass-panel">
+    <p class="eyebrow">LECTURA DE AFINIDADES</p>
+    <h1>Descifra el campo de batalla</h1>
+    <p>Consulta las debilidades, resistencias e inmunidades de un tipo o espécimen.</p>
+  </section>
+
+  <ion-segment [(ngModel)]="mode" (ionChange)="analyzeSelection()" aria-label="Modo del oráculo">
+    <ion-segment-button value="type">
+      <ion-label>Por elemento</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pokemon">
+      <ion-label>Por espécimen</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <ion-item class="selection-field glass-panel">
+    <ion-label position="stacked">{{ mode === 'type' ? 'Afinidad elemental' : 'Espécimen a analizar' }}</ion-label>
+    <ion-select
+      *ngIf="mode === 'type'"
+      [(ngModel)]="selectedType"
+      (ionChange)="analyzeSelection()"
+      interface="popover"
+      placeholder="Selecciona un tipo"
+    >
+      <ion-select-option *ngFor="let type of typeOptions" [value]="type.name">
+        {{ type.name | titlecase }}
+      </ion-select-option>
+    </ion-select>
+    <ion-select
+      *ngIf="mode === 'pokemon'"
+      [(ngModel)]="selectedPokemon"
+      (ionChange)="analyzeSelection()"
+      interface="popover"
+      placeholder="Selecciona un Pokémon"
+    >
+      <ion-select-option *ngFor="let pokemon of pokemonOptions" [value]="pokemon.name">
+        {{ pokemon.name | titlecase }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <div *ngIf="loading" class="reading-skeleton" aria-label="Calculando afinidades">
+    <ion-skeleton-text animated *ngFor="let item of [1, 2, 3]" class="skeleton-card"></ion-skeleton-text>
+  </div>
+
+  <ion-text color="danger" *ngIf="errorMessage">
+    <p class="feedback-message">{{ errorMessage }}</p>
+  </ion-text>
+
+  <section *ngIf="effectiveness && !loading" class="reading-result">
+    <p class="result-caption">
+      {{ mode === 'type' ? 'Resistencias del tipo' : 'Afinidades defensivas de' }}
+      <strong>{{ analyzedName | titlecase }}</strong>
+    </p>
+    <article class="relation-panel glass-panel" *ngFor="let group of groups">
+      <header>
+        <h2>{{ group.label }}</h2>
+        <span>{{ resourcesFor(group.key).length }} elementos</span>
+      </header>
+      <div class="type-chips" *ngIf="resourcesFor(group.key).length; else emptyRelation">
+        <ion-chip
+          *ngFor="let type of resourcesFor(group.key)"
+          [color]="group.color"
+          class="type-chip type-{{ type.name }}"
+        >
+          <ion-label>{{ type.name | titlecase }} <strong>{{ group.multiplier }}</strong></ion-label>
+        </ion-chip>
+      </div>
+      <ng-template #emptyRelation>
+        <p class="empty-note">Ninguna afinidad registrada en esta categoría.</p>
+      </ng-template>
+    </article>
+  </section>
+</ion-content>

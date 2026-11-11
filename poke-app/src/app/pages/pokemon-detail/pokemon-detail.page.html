@@ -1,15 +1,16 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/pokemon-list"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/codice"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ pokemon?.name | titlecase }}</ion-title>
+    <ion-title>Expediente Biométrico</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div *ngIf="loading" class="ion-text-center">
-    <ion-spinner name="crescent"></ion-spinner>
+  <div *ngIf="loading" class="detail-skeletons" aria-label="Cargando expediente biométrico">
+    <ion-skeleton-text animated class="hero-skeleton"></ion-skeleton-text>
+    <ion-skeleton-text animated class="data-skeleton"></ion-skeleton-text>
   </div>
 
   <ion-text color="danger" *ngIf="!loading && errorMessage">
@@ -17,7 +18,7 @@
   </ion-text>
 
   <ng-container *ngIf="!loading && pokemon">
-    <ion-card>
+    <ion-card class="pokemon-card type-{{ pokemon.types?.[0]?.type?.name || 'normal' }}">
       <img
         class="featured-image"
         [src]="pokemon.sprites?.other?.['official-artwork']?.front_default || pokemon.sprites?.front_default"
@@ -27,6 +28,14 @@
       <ion-card-header>
         <ion-card-subtitle>#{{ pokemon.id }}</ion-card-subtitle>
         <ion-card-title>{{ pokemon.name | titlecase }}</ion-card-title>
+        <div class="type-badges">
+          <ion-chip
+            *ngFor="let type of pokemon.types"
+            class="type-chip type-{{ type.type.name }}"
+          >
+            {{ type.type.name | titlecase }}
+          </ion-chip>
+        </div>
       </ion-card-header>
 
       <ion-card-content>
@@ -39,15 +48,27 @@
             <ion-label>Altura / Peso</ion-label>
             <ion-note slot="end">{{ pokemon.height / 10 }} m / {{ pokemon.weight / 10 }} kg</ion-note>
           </ion-item>
-          <ion-item>
-            <ion-label>Tipos</ion-label>
-            <ion-chip *ngFor="let type of pokemon.types" color="secondary">
-              {{ type.type.name | titlecase }}
-            </ion-chip>
-          </ion-item>
         </ion-list>
       </ion-card-content>
     </ion-card>
+
+    <section class="trait-panel glass-panel" *ngIf="pokemon.abilities?.length" aria-labelledby="traits-title">
+      <p class="eyebrow">PERFIL DE CAPACIDADES</p>
+      <h2 id="traits-title">Rasgos Latentes</h2>
+      <ion-chip *ngFor="let ability of pokemon.abilities" color="tertiary">
+        {{ ability.ability.name | titlecase }}
+        <span *ngIf="ability.is_hidden"> · Oculta</span>
+      </ion-chip>
+    </section>
+
+    <section class="stat-panel glass-panel" *ngIf="pokemon.stats?.length" aria-labelledby="stats-title">
+      <p class="eyebrow">LECTURA DE PARÁMETROS</p>
+      <h2 id="stats-title">Matriz de Combate</h2>
+      <div class="detail-stat" *ngFor="let stat of pokemon.stats">
+        <div><span>{{ stat.stat.name | titlecase }}</span><strong>{{ stat.base_stat }}</strong></div>
+        <ion-progress-bar [value]="stat.base_stat / 255"></ion-progress-bar>
+      </div>
+    </section>
 
     <section aria-labelledby="sound-title">
       <h2 id="sound-title">Sonido del Pokémon</h2>
@@ -85,7 +106,7 @@
     </section>
 
     <section aria-labelledby="compare-title">
-      <h2 id="compare-title">Comparar Pokémon</h2>
+      <h2 id="compare-title">Duelo de parámetros</h2>
       <ion-item>
         <ion-label>Elige un Pokémon</ion-label>
         <ion-select

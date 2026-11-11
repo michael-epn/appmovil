@@ -1,0 +1,103 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Coliseo Biométrico</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <section class="intro-panel glass-panel">
+    <p class="eyebrow">MATRIZ DE COMBATE</p>
+    <h1>Enfrenta sus parámetros</h1>
+    <p>Selecciona dos especímenes y descubre quién domina cada atributo.</p>
+  </section>
+
+  <div class="selector-grid">
+    <ion-item class="glass-panel">
+      <ion-label position="stacked">Primer contendiente</ion-label>
+      <ion-select [(ngModel)]="firstName" interface="popover" placeholder="Elige un Pokémon">
+        <ion-select-option
+          *ngFor="let pokemon of pokemonOptions"
+          [value]="pokemon.name"
+          [disabled]="pokemon.name === secondName"
+        >
+          {{ pokemon.name | titlecase }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item class="glass-panel">
+      <ion-label position="stacked">Rival del coliseo</ion-label>
+      <ion-select [(ngModel)]="secondName" interface="popover" placeholder="Elige un Pokémon">
+        <ion-select-option
+          *ngFor="let pokemon of pokemonOptions"
+          [value]="pokemon.name"
+          [disabled]="pokemon.name === firstName"
+        >
+          {{ pokemon.name | titlecase }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+  </div>
+
+  <ion-button
+    expand="block"
+    class="action-button"
+    (click)="compare()"
+    [disabled]="!firstName || !secondName || firstName === secondName || loading"
+  >
+    <ion-icon slot="start" name="flash-outline"></ion-icon>
+    {{ loading ? 'Analizando parámetros…' : 'Iniciar comparación' }}
+  </ion-button>
+
+  <div *ngIf="loading" class="skeleton-grid" aria-label="Analizando los especímenes">
+    <ion-skeleton-text animated class="skeleton-card"></ion-skeleton-text>
+    <ion-skeleton-text animated class="skeleton-card"></ion-skeleton-text>
+  </div>
+
+  <ion-text color="danger" *ngIf="errorMessage">
+    <p class="feedback-message">{{ errorMessage }}</p>
+  </ion-text>
+
+  <ng-container *ngIf="firstPokemon && secondPokemon && !loading">
+    <div class="combatants">
+      <article class="combatant glass-panel">
+        <img [src]="firstPokemon.sprites.front_default" [alt]="firstPokemon.name" />
+        <h2>{{ firstPokemon.name | titlecase }}</h2>
+        <span class="specimen-id">#{{ firstPokemon.id }}</span>
+      </article>
+      <div class="versus-mark" aria-label="contra">VS</div>
+      <article class="combatant glass-panel">
+        <img [src]="secondPokemon.sprites.front_default" [alt]="secondPokemon.name" />
+        <h2>{{ secondPokemon.name | titlecase }}</h2>
+        <span class="specimen-id">#{{ secondPokemon.id }}</span>
+      </article>
+    </div>
+
+    <section class="matrix-panel glass-panel">
+      <h2>Matriz de Combate</h2>
+      <div class="stat-row" *ngFor="let stat of combatStats">
+        <div class="stat-heading">
+          <span>{{ stat.label }}</span>
+          <span>{{ statValue(firstPokemon, stat.key) }} : {{ statValue(secondPokemon, stat.key) }}</span>
+        </div>
+        <div class="stat-bars">
+          <ion-progress-bar
+            [value]="statProgress(firstPokemon, stat.key)"
+            [color]="statValue(firstPokemon, stat.key) >= statValue(secondPokemon, stat.key) ? 'primary' : 'medium'"
+          ></ion-progress-bar>
+          <ion-progress-bar
+            [value]="statProgress(secondPokemon, stat.key)"
+            [color]="statValue(secondPokemon, stat.key) >= statValue(firstPokemon, stat.key) ? 'tertiary' : 'medium'"
+          ></ion-progress-bar>
+        </div>
+      </div>
+
+      <div class="verdict">
+        <ion-icon [name]="winner ? 'trophy-outline' : 'shield-checkmark-outline'"></ion-icon>
+        <div>
+          <strong>{{ winner ? (winner | titlecase) + ' lleva la ventaja' : 'Combate en equilibrio' }}</strong>
+          <p>Totales · {{ firstPokemon.name | titlecase }} {{ firstTotal }} / {{ secondPokemon.name | titlecase }} {{ secondTotal }}</p>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+</ion-content>

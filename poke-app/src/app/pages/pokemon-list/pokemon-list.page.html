@@ -1,26 +1,36 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Pokémon List</ion-title>
+    <ion-title>Códice Kanto/Nacional</ion-title>
   </ion-toolbar>
-  <ion-toolbar>
-    <ion-searchbar placeholder="Busca tu pokémon" [(ngModel)]="searchTerm" (ionInput)="filtrar()"></ion-searchbar>
+  <ion-toolbar class="search-toolbar">
+    <ion-searchbar
+      placeholder="Rastreador de Especímenes"
+      [(ngModel)]="searchTerm"
+      (ionInput)="filtrar()"
+      animated="true"
+    ></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-list>
-    @for (pokemon of pokemonsFiltrados; track pokemon.name) {
-    <ion-item button detail="true" (click)="verDetalle(pokemon.name)">
-      <ion-label>
-        <h2>{{ pokemon.name | titlecase }}</h2>
-      </ion-label>
-    </ion-item>
-    } @empty {
-    <ion-item>
-      <ion-note>No hay pokémons</ion-note>
-    </ion-item>
-    }
-  </ion-list>
+<ion-content class="ion-padding">
+  <p class="catalog-caption">Archivo de campo · {{ pokemonsFiltrados.length }} especímenes</p>
 
-  <ion-spinner *ngIf="loading" class="loading-spinner"></ion-spinner>
+  <div *ngIf="loading" class="pokemon-skeletons" aria-label="Cargando el códice">
+    <ion-skeleton-text animated *ngFor="let item of [1, 2, 3, 4, 5, 6]" class="skeleton-card"></ion-skeleton-text>
+  </div>
+
+  <div class="pokemon-grid" *ngIf="!loading">
+    @for (pokemon of pokemonsFiltrados; track pokemon.name) {
+      <button class="pokemon-card glass-panel" type="button" (click)="verDetalle(pokemon.name)">
+        <img [src]="imageUrl(pokemon.url)" [alt]="pokemon.name" loading="lazy" />
+        <span>{{ pokemon.name | titlecase }}</span>
+        <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+      </button>
+    } @empty {
+      <div class="empty-state glass-panel">
+        <ion-icon name="scan-outline"></ion-icon>
+        <p>No hay especímenes que coincidan con ese rastreo.</p>
+      </div>
+    }
+  </div>
 </ion-content>

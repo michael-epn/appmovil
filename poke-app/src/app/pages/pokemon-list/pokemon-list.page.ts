@@ -22,7 +22,7 @@ export class PokemonListPage implements OnInit {
 
   fetchPokemons() {
     this.loading = true;
-    this.pokemonService.getPokemons(10).subscribe({
+    this.pokemonService.getPokemons(1302).subscribe({
       next: (response) => {
         this.pokemons = response.results;
         this.pokemonsFiltrados = response.results;
@@ -42,6 +42,14 @@ export class PokemonListPage implements OnInit {
       ? this.pokemons.filter(p => p.name.toLowerCase().includes(query))
       : [...this.pokemons];
   }
+
+  imageUrl(pokemonUrl: string): string {
+    const id = pokemonUrl.match(/\/pokemon\/(\d+)\/?$/)?.[1];
+    return id
+      ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+      : '';
+  }
+
   verDetalle(name: string) {
     this.router.navigate(['/pokemon-detail', name]);
   }

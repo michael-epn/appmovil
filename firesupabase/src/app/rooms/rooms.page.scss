@@ -1,0 +1,119 @@
+.rooms-content {
+  --padding-bottom: 7rem;
+}
+
+.page-heading {
+  padding: 1.25rem 1rem 0.75rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--ion-color-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.page-heading h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 8vw, 2.4rem);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+
+.page-heading > p:last-child {
+  margin: 0.5rem 0 0;
+  color: var(--ion-color-medium);
+}
+
+.rooms-list {
+  padding: 0 1rem;
+  background: transparent;
+}
+
+.room-item {
+  --background: var(--ion-item-background, var(--ion-background-color));
+  --border-radius: 1.1rem;
+  --padding-start: 0.85rem;
+  --inner-padding-end: 0.85rem;
+  margin: 0.55rem 0;
+  border: 1px solid var(--ion-color-step-100);
+  border-radius: 1.1rem;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 3%);
+}
+
+.room-avatar {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  background: color-mix(in srgb, var(--ion-color-primary) 14%, var(--ion-background-color));
+  color: var(--ion-color-primary);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.room-item h2 {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.room-item p {
+  overflow: hidden;
+  color: var(--ion-color-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+ion-searchbar {
+  --border-radius: 1.25rem;
+  --box-shadow: none;
+  padding-inline: 1rem;
+}
+
+ion-fab {
+  margin: 0 0.5rem 6.25rem 0;
+}
+
+ion-fab-button {
+  --box-shadow: 0 8px 20px color-mix(in srgb, var(--ion-color-primary) 30%, transparent);
+}
+
+.empty-state {
+  display: grid;
+  min-height: 46vh;
+  align-content: center;
+  justify-items: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.empty-icon {
+  display: grid;
+  width: 5.5rem;
+  height: 5.5rem;
+  place-items: center;
+  border-radius: 2rem;
+  background: color-mix(in srgb, var(--ion-color-primary) 12%, var(--ion-background-color));
+  color: var(--ion-color-primary);
+}
+
+.empty-icon ion-icon {
+  font-size: 2.5rem;
+}
+
+.empty-state h2 {
+  max-width: 20rem;
+  margin-bottom: 0;
+  font-size: 1.2rem;
+}
+
+.empty-state p {
+  max-width: 20rem;
+  color: var(--ion-color-medium);
+}
+
+.error-message {
+  margin: 0.5rem 1rem;
+  color: var(--ion-color-danger);
+}

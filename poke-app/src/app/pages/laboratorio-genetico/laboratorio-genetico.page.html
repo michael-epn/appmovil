@@ -1,0 +1,66 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Laboratorio Genético</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <section class="intro-panel glass-panel">
+    <p class="eyebrow">ARCHIVO DE ESPECIES</p>
+    <h1>Rastrea cada transformación</h1>
+    <p>Explora las fases evolutivas y sus condiciones. Toca una fase para abrir su expediente.</p>
+  </section>
+
+  <ion-item class="selection-field glass-panel">
+    <ion-label position="stacked">Especie de origen</ion-label>
+    <ion-select
+      [(ngModel)]="selectedPokemon"
+      (ionChange)="analyzeLine()"
+      interface="popover"
+      placeholder="Selecciona un Pokémon"
+    >
+      <ion-select-option *ngFor="let pokemon of pokemonOptions" [value]="pokemon.name">
+        {{ pokemon.name | titlecase }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <div *ngIf="loading" class="evolution-skeleton" aria-label="Consultando la línea evolutiva">
+    <ion-skeleton-text animated *ngFor="let phase of [1, 2, 3]" class="skeleton-node"></ion-skeleton-text>
+  </div>
+
+  <ion-text color="danger" *ngIf="errorMessage">
+    <p class="feedback-message">{{ errorMessage }}</p>
+  </ion-text>
+
+  <section *ngIf="evolutionLine && !loading" class="evolution-chart">
+    <p class="chart-caption">Línea evolutiva de <strong>{{ selectedPokemon | titlecase }}</strong></p>
+    <ng-container
+      *ngTemplateOutlet="evolutionNode; context: { $implicit: evolutionLine }"
+    ></ng-container>
+  </section>
+
+  <ng-template #evolutionNode let-node>
+    <article class="evolution-stage">
+      <button
+        type="button"
+        class="stage-card glass-panel"
+        (click)="openPokemon(node.name)"
+        [attr.aria-label]="'Abrir expediente de ' + node.name"
+      >
+        <img [src]="node.imageUrl" [alt]="node.name" loading="lazy" />
+        <span class="stage-number">FASE {{ node.speciesId }}</span>
+        <strong>{{ node.name | titlecase }}</strong>
+        <small>{{ node.requirement }}</small>
+      </button>
+      <div class="evolution-branches" *ngIf="node.evolvesTo.length">
+        <div class="evolution-branch" *ngFor="let child of node.evolvesTo">
+          <span class="branch-condition">{{ child.requirement }}</span>
+          <ng-container
+            *ngTemplateOutlet="evolutionNode; context: { $implicit: child }"
+          ></ng-container>
+        </div>
+      </div>
+    </article>
+  </ng-template>
+</ion-content>

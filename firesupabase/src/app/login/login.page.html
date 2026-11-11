@@ -1,0 +1,50 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ isRegistering ? 'Crear cuenta' : 'Iniciar sesión' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <main class="auth-card">
+    <h1>{{ isRegistering ? 'Únete a FireSupaBase' : 'Bienvenido' }}</h1>
+    <p>Usa tu correo y contraseña para continuar.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <ion-item>
+        <ion-input
+          label="Correo electrónico"
+          labelPlacement="stacked"
+          type="email"
+          autocomplete="email"
+          formControlName="email"
+        />
+      </ion-item>
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+      <p class="field-error">Ingresa un correo electrónico válido.</p>
+      }
+
+      <ion-item>
+        <ion-input
+          label="Contraseña"
+          labelPlacement="stacked"
+          type="password"
+          autocomplete="current-password"
+          formControlName="password"
+        />
+      </ion-item>
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+      <p class="field-error">La contraseña debe tener al menos 8 caracteres.</p>
+      } @if (errorMessage) {
+      <p class="field-error" role="alert">{{ errorMessage }}</p>
+      }
+
+      <ion-button expand="block" type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Procesando…' : isRegistering ? 'Crear cuenta' : 'Iniciar sesión' }}
+      </ion-button>
+    </form>
+
+    <ion-button expand="block" fill="clear" (click)="toggleMode()">
+      {{ isRegistering ? 'Ya tengo una cuenta' : 'Crear una cuenta' }}
+    </ion-button>
+  </main>
+</ion-content>

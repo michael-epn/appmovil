@@ -60,7 +60,7 @@ export class PokemonDetailPage implements OnInit {
   }
 
   cargarOpcionesComparacion() {
-    this.pokemonService.getPokemons(30).subscribe({
+    this.pokemonService.getPokemons(1302).subscribe({
       next: (response) => {
         this.pokemonOptions = response.results;
       },

@@ -35,3 +35,77 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
+
+html,
+body,
+ion-app {
+  background: #0b1020;
+}
+
+ion-content {
+  --background:
+    radial-gradient(ellipse at 12% 0%, rgba(80, 95, 160, 0.2), transparent 38%),
+    radial-gradient(ellipse at 100% 42%, rgba(67, 151, 148, 0.09), transparent 36%),
+    #0b1020;
+}
+
+ion-header {
+  box-shadow: none;
+}
+
+ion-toolbar {
+  --background: rgba(11, 16, 32, 0.72);
+  --border-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+ion-title {
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+.glass-panel {
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(16px);
+}
+
+$element-colors: (
+  normal: #a8a878,
+  fire: #f08030,
+  water: #6890f0,
+  electric: #f8d030,
+  grass: #78c850,
+  ice: #98d8d8,
+  fighting: #c03028,
+  poison: #a040a0,
+  ground: #e0c068,
+  flying: #a890f0,
+  psychic: #f85888,
+  bug: #a8b820,
+  rock: #b8a038,
+  ghost: #705898,
+  dragon: #7038f8,
+  dark: #705848,
+  steel: #b8b8d0,
+  fairy: #ee99ac
+);
+
+@each $type, $color in $element-colors {
+  .type-#{$type} {
+    --element-color: #{$color};
+  }
+
+  .pokemon-card.type-#{$type} {
+    box-shadow: 0 14px 32px rgba($color, 0.22);
+  }
+
+  ion-chip.type-#{$type} {
+    --background: rgba($color, 0.2);
+    --color: #fff;
+    border: 1px solid rgba($color, 0.42);
+  }
+}

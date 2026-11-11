@@ -1,0 +1,38 @@
+:host {
+  --tab-bar-height: 76px;
+}
+
+ion-tab-bar {
+  position: absolute;
+  right: 1rem;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  left: 1rem;
+  width: auto;
+  height: var(--tab-bar-height);
+  padding: 0.4rem 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgb(var(--ion-text-color-rgb), 0.08);
+  border-radius: 1.5rem;
+  background: rgb(var(--ion-background-color-rgb), 0.82);
+  box-shadow: 0 8px 30px rgb(0 0 0 / 12%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+ion-tab-button {
+  --color: var(--ion-color-medium);
+  --color-selected: var(--ion-color-primary);
+  --background: transparent;
+  max-width: 120px;
+  border-radius: 1rem;
+}
+
+ion-tab-button ion-icon {
+  font-size: 1.4rem;
+}
+
+ion-tab-button ion-label {
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
