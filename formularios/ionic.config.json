@@ -1,1 +1,7 @@
-{"name":"registro-candidatos","integrations":{},"type":"angular"}
+{
+  "name": "registro-candidatos",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
