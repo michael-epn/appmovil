@@ -53,11 +53,11 @@ npm run build
 
 1. Crea o selecciona un proyecto en Firebase Console y registra una aplicación web.
 2. Crea una base de datos de Cloud Firestore.
-3. Configura los valores `firebase` de `src/environments/environment.ts` con la configuración de la aplicación.
+3. Copia `src/environments/environment.example.ts` a `src/environments/environment.ts` y completa localmente los valores `firebase` con la configuración de la aplicación. El archivo `environment.ts` está excluido de Git; no agregues credenciales ni datos reales a la plantilla.
 4. Firebase se inicializa con la API modular en `src/main.ts`, donde también se configura Firestore y el enrutamiento.
 5. Antes de probar el guardado o la lectura, configura reglas de Firestore que permitan a los usuarios autorizados acceder a `candidatos`.
 
-La configuración web de Firebase se utiliza en el cliente y no equivale a una credencial de administrador. Las reglas de Firestore son las que controlan el acceso a los datos.
+La configuración web de Firebase se incluye en la aplicación cliente y no equivale a una credencial de administrador. No guardes claves privadas ni cuentas de servicio en el cliente. Las reglas de Firestore son las que controlan el acceso a los datos.
 
 ### Estado actual de las reglas
 
@@ -108,6 +108,7 @@ El formulario valida, entre otros requisitos, correo y teléfono, fechas no futu
 - `src/app/models/candidato.ts`: modelo TypeScript del candidato.
 - `src/app/services/candidatos.service.ts`: métodos `agregarCandidato()` y `obtenerCandidatos()`.
 - `src/app/services/firestore.token.ts`: token de inyección de la instancia Firestore.
-- `src/environments/environment.ts`: configuración Firebase del entorno.
+- `src/environments/environment.example.ts`: plantilla vacía de configuración Firebase.
+- `src/environments/environment.ts`: configuración Firebase local, excluida de Git.
 - `src/main.ts`: inicialización de Firebase, Firestore y rutas (`/` y `/candidatos`).
 - `firestore.rules`: reglas de seguridad de Firestore.

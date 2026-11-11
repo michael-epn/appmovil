@@ -3,3 +3,42 @@ www/
 dist/
 .angular/
 .DS_Store
+
+# Local environment variables and credentials
+.env
+.env.*
+!.env.example
+environment.ts
+environment.*.ts
+!environment.example.ts
+/src/environments/environment.ts
+/src/environments/environment.*.ts
+!/src/environments/environment.example.ts
+*.local
+*.local.*
+*.local.json
+
+# Firebase local state and service-account credentials
+.firebase/
+.firebaserc
+serviceAccount*.json
+*-service-account*.json
+*service-account*.json
+
+# Signing keys and certificates
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.mobileprovision
+key.properties
+
+# Native build output and IDE state
+android/.gradle/
+android/**/build/
+ios/
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
