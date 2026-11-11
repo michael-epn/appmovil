@@ -1,5 +1,27 @@
-ion-card { max-width: 600px; margin: 20px auto; border-radius: 12px; }
-ion-card-title { text-align: center; }
-ion-button { margin-top: 20px; }
-h2 { max-width: 600px; margin: 25px auto 10px; font-weight: bold; }
-ion-list { max-width: 600px; margin: auto; }
+ion-card {
+  max-width: 720px;
+  margin: 20px auto;
+  border-radius: 12px;
+}
+
+ion-card-title {
+  text-align: center;
+}
+
+ion-item {
+  margin-top: 8px;
+}
+
+ion-datetime {
+  margin: 8px auto 16px;
+}
+
+.error-message {
+  padding: 4px 16px;
+  color: var(--ion-color-danger);
+  font-size: 0.875rem;
+}
+
+.status-message {
+  text-align: center;
+}

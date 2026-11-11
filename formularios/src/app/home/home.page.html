@@ -1,15 +1,286 @@
-<ion-header><ion-toolbar color="primary"><ion-title>Registro de estudiantes</ion-title></ion-toolbar></ion-header>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Registro de candidatos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="ion-padding">
   <ion-card>
-    <ion-card-header><ion-card-title>Nuevo estudiante</ion-card-title></ion-card-header>
+    <ion-card-header>
+      <ion-card-title>Datos del candidato</ion-card-title>
+    </ion-card-header>
+
     <ion-card-content>
-      <ion-item><ion-input label="Nombre" labelPlacement="stacked" placeholder="Ingrese su nombre" [(ngModel)]="nombre"></ion-input></ion-item>
-      <ion-item><ion-input label="Correo electrónico" labelPlacement="stacked" type="email" placeholder="correo@ejemplo.com" [(ngModel)]="correo"></ion-input></ion-item>
-      <ion-item><ion-input label="Edad" labelPlacement="stacked" type="number" placeholder="Ingrese su edad" [(ngModel)]="edad"></ion-input></ion-item>
-      <ion-button expand="block" class="ion-margin-top" [disabled]="guardando" (click)="guardar()">{{ guardando ? 'Guardando...' : 'Guardar estudiante' }}</ion-button>
-      <p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+      <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+        <ion-item>
+          <ion-input
+            label="Nombres"
+            labelPlacement="stacked"
+            placeholder="Nombres y apellidos"
+            formControlName="nombres"
+            autocomplete="name"
+          ></ion-input>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.nombres.touched && formulario.controls.nombres.hasError('required')"
+          role="alert"
+        >
+          Los nombres son obligatorios.
+        </div>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.nombres.touched && formulario.controls.nombres.hasError('minlength')"
+          role="alert"
+        >
+          Escribe al menos 3 caracteres.
+        </div>
+
+        <ion-item>
+          <ion-input
+            label="Correo electrónico"
+            labelPlacement="stacked"
+            type="email"
+            placeholder="correo@ejemplo.com"
+            formControlName="correo"
+            autocomplete="email"
+          ></ion-input>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.correo.touched && formulario.controls.correo.invalid"
+          role="alert"
+        >
+          Ingresa un correo electrónico válido.
+        </div>
+
+        <ion-item>
+          <ion-input
+            label="Teléfono"
+            labelPlacement="stacked"
+            type="tel"
+            placeholder="+593 99 123 4567"
+            formControlName="telefono"
+            autocomplete="tel"
+          ></ion-input>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.telefono.touched && formulario.controls.telefono.invalid"
+          role="alert"
+        >
+          Ingresa un teléfono con entre 7 y 15 dígitos.
+        </div>
+
+        <ion-item lines="none">
+          <ion-label position="stacked">Fecha de nacimiento</ion-label>
+        </ion-item>
+        <ion-datetime
+          presentation="date"
+          [max]="hoy"
+          formControlName="fechaNacimiento"
+          aria-label="Fecha de nacimiento"
+        ></ion-datetime>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.fechaNacimiento.touched && formulario.controls.fechaNacimiento.hasError('required')"
+          role="alert"
+        >
+          La fecha de nacimiento es obligatoria.
+        </div>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.fechaNacimiento.touched && formulario.controls.fechaNacimiento.hasError('fechaFutura')"
+          role="alert"
+        >
+          La fecha de nacimiento no puede ser futura.
+        </div>
+
+        <ion-item>
+          <ion-select
+            label="Cargo"
+            labelPlacement="stacked"
+            placeholder="Selecciona un cargo"
+            formControlName="cargo"
+          >
+            <ion-select-option *ngFor="let cargo of cargos" [value]="cargo">
+              {{ cargo }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.cargo.touched && formulario.controls.cargo.hasError('required')"
+          role="alert"
+        >
+          Selecciona un cargo.
+        </div>
+
+        <ion-item lines="none">
+          <ion-label>Nivel académico</ion-label>
+        </ion-item>
+        <ion-radio-group formControlName="nivelAcademico">
+          <ion-item *ngFor="let nivel of nivelesAcademicos">
+            <ion-radio [value]="nivel" labelPlacement="end">{{ nivel }}</ion-radio>
+          </ion-item>
+        </ion-radio-group>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.nivelAcademico.touched && formulario.controls.nivelAcademico.hasError('required')"
+          role="alert"
+        >
+          Selecciona tu nivel académico.
+        </div>
+
+        <ion-item>
+          <ion-input
+            label="Años de experiencia"
+            labelPlacement="stacked"
+            type="number"
+            min="0"
+            max="50"
+            step="1"
+            formControlName="experienciaAnios"
+          ></ion-input>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.experienciaAnios.touched && formulario.controls.experienciaAnios.invalid"
+          role="alert"
+        >
+          Ingresa un número entero entre 0 y 50.
+        </div>
+
+        <ion-item lines="none">
+          <ion-label>Modalidad de trabajo</ion-label>
+        </ion-item>
+        <ion-segment formControlName="modalidad">
+          <ion-segment-button value="Presencial">
+            <ion-label>Presencial</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="Híbrida">
+            <ion-label>Híbrida</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="Remota">
+            <ion-label>Remota</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.modalidad.touched && formulario.controls.modalidad.hasError('required')"
+          role="alert"
+        >
+          Selecciona una modalidad de trabajo.
+        </div>
+
+        <ion-item lines="none">
+          <ion-label>Habilidades técnicas</ion-label>
+        </ion-item>
+        <div formArrayName="habilidades">
+          <ion-item *ngFor="let habilidad of habilidadesOpciones; let i = index">
+            <ion-checkbox [formControlName]="i" labelPlacement="end">
+              {{ habilidad }}
+            </ion-checkbox>
+          </ion-item>
+        </div>
+        <div
+          class="error-message"
+          *ngIf="habilidades.touched && habilidades.hasError('minimoUna')"
+          role="alert"
+        >
+          Selecciona al menos una habilidad.
+        </div>
+
+        <ion-item lines="none">
+          <ion-label position="stacked">Fecha de disponibilidad</ion-label>
+        </ion-item>
+        <ion-datetime
+          presentation="date"
+          [min]="hoy"
+          formControlName="fechaDisponibilidad"
+          aria-label="Fecha de disponibilidad"
+        ></ion-datetime>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.fechaDisponibilidad.touched && formulario.controls.fechaDisponibilidad.hasError('required')"
+          role="alert"
+        >
+          La fecha de disponibilidad es obligatoria.
+        </div>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.fechaDisponibilidad.touched && formulario.controls.fechaDisponibilidad.hasError('fechaPasada')"
+          role="alert"
+        >
+          La fecha de disponibilidad no puede ser anterior a hoy.
+        </div>
+
+        <ion-item>
+          <ion-input
+            label="Aspiración salarial"
+            labelPlacement="stacked"
+            type="number"
+            min="0.01"
+            step="0.01"
+            placeholder="0.00"
+            formControlName="aspiracionSalarial"
+          ></ion-input>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.aspiracionSalarial.touched && formulario.controls.aspiracionSalarial.invalid"
+          role="alert"
+        >
+          Ingresa una aspiración salarial mayor que cero.
+        </div>
+
+        <ion-item>
+          <ion-textarea
+            label="Resumen profesional"
+            labelPlacement="stacked"
+            placeholder="Describe tu perfil y experiencia"
+            [autoGrow]="true"
+            formControlName="resumen"
+          ></ion-textarea>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.resumen.touched && formulario.controls.resumen.hasError('required')"
+          role="alert"
+        >
+          El resumen profesional es obligatorio.
+        </div>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.resumen.touched && formulario.controls.resumen.hasError('minlength')"
+          role="alert"
+        >
+          El resumen debe tener al menos 30 caracteres.
+        </div>
+
+        <ion-item>
+          <ion-checkbox formControlName="consentimiento" labelPlacement="end">
+            Acepto el tratamiento de mis datos personales.
+          </ion-checkbox>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="formulario.controls.consentimiento.touched && formulario.controls.consentimiento.invalid"
+          role="alert"
+        >
+          Debes aceptar el consentimiento para registrarte.
+        </div>
+
+        <ion-button
+          expand="block"
+          class="ion-margin-top"
+          type="submit"
+          [disabled]="formulario.invalid || guardando"
+        >
+          {{ guardando ? 'Guardando...' : 'Registrar candidato' }}
+        </ion-button>
+        <p *ngIf="mensaje" class="status-message" role="status">{{ mensaje }}</p>
+      </form>
     </ion-card-content>
   </ion-card>
-  <h2>Estudiantes registrados</h2>
-  <ion-list><ion-item *ngFor="let estudiante of estudiantes"><ion-label><h2>{{ estudiante.nombre }}</h2><p>{{ estudiante.correo }}</p><p>Edad: {{ estudiante.edad }}</p></ion-label></ion-item></ion-list>
 </ion-content>
