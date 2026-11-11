@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /estudiantes/{documento} {
+      // SOLO PARA DEMOSTRACIÓN CON DATOS FICTICIOS. No usar en producción.
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+  }
+}
