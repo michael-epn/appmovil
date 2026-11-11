@@ -1,7 +1,6 @@
-import { Injectable } from '@angular/core';
-import { initializeApp, getApp, getApps } from 'firebase/app';
-import { addDoc, collection, getDocs, getFirestore } from 'firebase/firestore';
-import { environment } from '../../environments/environment';
+import { inject, Injectable } from '@angular/core';
+import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { FIRESTORE } from './firestore.token';
 
 export interface Estudiante {
   nombre: string;
@@ -11,8 +10,7 @@ export interface Estudiante {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
-  private app = getApps().length ? getApp() : initializeApp(environment.firebase);
-  private db = getFirestore(this.app);
+  private db = inject(FIRESTORE);
 
   guardarEstudiante(estudiante: Estudiante) {
     return addDoc(collection(this.db, 'estudiantes'), estudiante);
