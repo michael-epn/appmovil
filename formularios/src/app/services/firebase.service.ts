@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { addDoc, collection, getDocs } from 'firebase/firestore';
-import { Candidato } from '../models/candidato';
 import { FIRESTORE } from './firestore.token';
 
 export interface Estudiante {
@@ -15,10 +14,6 @@ export class FirebaseService {
 
   guardarEstudiante(estudiante: Estudiante) {
     return addDoc(collection(this.db, 'estudiantes'), estudiante);
-  }
-
-  guardarCandidato(candidato: Candidato) {
-    return addDoc(collection(this.db, 'candidatos'), candidato);
   }
 
   async obtenerEstudiantes(): Promise<(Estudiante & { id: string })[]> {

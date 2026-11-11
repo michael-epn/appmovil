@@ -27,12 +27,14 @@ import {
   IonSegmentButton,
   IonSelect,
   IonSelectOption,
+  IonSpinner,
   IonTextarea,
+  IonToast,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
 import { Candidato } from '../models/candidato';
-import { FirebaseService } from '../services/firebase.service';
+import { CandidatosService } from '../services/candidatos.service';
 
 @Component({
   selector: 'app-home',
@@ -60,14 +62,16 @@ import { FirebaseService } from '../services/firebase.service';
     IonSegmentButton,
     IonSelect,
     IonSelectOption,
+    IonSpinner,
     IonTextarea,
+    IonToast,
     IonTitle,
     IonToolbar
   ]
 })
 export class HomePage {
   private readonly fb = inject(FormBuilder);
-  private readonly firebase = inject(FirebaseService);
+  private readonly candidatosService = inject(CandidatosService);
 
   readonly hoy = this.fechaLocal(new Date());
   readonly habilidadesOpciones = [
@@ -146,7 +150,9 @@ export class HomePage {
   });
 
   guardando = false;
-  mensaje = '';
+  toastAbierto = false;
+  toastMensaje = '';
+  toastColor: 'success' | 'danger' = 'success';
 
   get habilidades(): FormArray<FormControl<boolean>> {
     return this.formulario.controls.habilidades;
@@ -187,18 +193,25 @@ export class HomePage {
     };
 
     this.guardando = true;
-    this.mensaje = '';
     try {
-      await this.firebase.guardarCandidato(candidato);
+      await this.candidatosService.agregarCandidato(candidato);
       this.formulario.reset();
-      this.mensaje = 'Candidato registrado correctamente.';
+      this.mostrarToast('Candidato registrado correctamente.', 'success');
     } catch (error) {
       console.error(error);
-      this.mensaje =
-        'No se pudo registrar el candidato. Revisa la conexión y las reglas de Firestore.';
+      this.mostrarToast(
+        'No se pudo registrar el candidato. Revisa la conexión y las reglas de Firestore.',
+        'danger'
+      );
     } finally {
       this.guardando = false;
     }
+  }
+
+  private mostrarToast(mensaje: string, color: 'success' | 'danger'): void {
+    this.toastMensaje = mensaje;
+    this.toastColor = color;
+    this.toastAbierto = true;
   }
 
   private fechaLocal(fecha: Date): string {

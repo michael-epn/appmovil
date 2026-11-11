@@ -277,10 +277,18 @@
           type="submit"
           [disabled]="formulario.invalid || guardando"
         >
+          <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
           {{ guardando ? 'Guardando...' : 'Registrar candidato' }}
         </ion-button>
-        <p *ngIf="mensaje" class="status-message" role="status">{{ mensaje }}</p>
       </form>
     </ion-card-content>
   </ion-card>
+
+  <ion-toast
+    [isOpen]="toastAbierto"
+    [message]="toastMensaje"
+    [color]="toastColor"
+    [duration]="3500"
+    (didDismiss)="toastAbierto = false"
+  ></ion-toast>
 </ion-content>
