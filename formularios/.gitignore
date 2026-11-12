@@ -5,15 +5,8 @@ dist/
 .DS_Store
 
 # Local environment variables and credentials
-.env
-.env.*
-!.env.example
-environment.ts
-environment.*.ts
-!environment.example.ts
 /src/environments/environment.ts
-/src/environments/environment.*.ts
-!/src/environments/environment.example.ts
+/src/environments/environment.prod.ts
 *.local
 *.local.*
 *.local.json
