@@ -1,21 +1,18 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title> Blank </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>
-      Start with Ionic
-      <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a>
-    </p>
-  </div>
+<ion-header><ion-toolbar color="primary"><ion-title>SensorLab · Acelerómetro</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <div class="intro"><h1>Laboratorio de sensores</h1><p>Observa la aceleración en los ejes X, Y y Z mientras inclinas o mueves tu teléfono.</p></div>
+  <ion-card><ion-card-header><ion-card-title>Estado del sensor</ion-card-title></ion-card-header><ion-card-content>
+    <ion-badge [color]="activo ? 'success' : 'medium'">{{ estado }}</ion-badge>
+    <ion-button expand="block" color="success" [disabled]="activo" (click)="iniciarSensor()">Iniciar acelerómetro</ion-button>
+    <ion-button expand="block" color="danger" [disabled]="!activo" (click)="detenerSensor()">Detener acelerómetro</ion-button>
+  </ion-card-content></ion-card>
+  <ion-card><ion-card-header><ion-card-title>Mediciones en tiempo real</ion-card-title></ion-card-header><ion-card-content>
+    <div class="medida"><span>Eje X</span><strong>{{ x | number:'1.2-2' }} m/s²</strong></div><ion-progress-bar color="primary" [value]="obtenerProgreso(x)"></ion-progress-bar>
+    <div class="medida"><span>Eje Y</span><strong>{{ y | number:'1.2-2' }} m/s²</strong></div><ion-progress-bar color="secondary" [value]="obtenerProgreso(y)"></ion-progress-bar>
+    <div class="medida"><span>Eje Z</span><strong>{{ z | number:'1.2-2' }} m/s²</strong></div><ion-progress-bar color="tertiary" [value]="obtenerProgreso(z)"></ion-progress-bar>
+  </ion-card-content></ion-card>
+  <ion-card><ion-card-header><ion-card-title>Magnitud total</ion-card-title></ion-card-header><ion-card-content><div class="numero">{{ magnitud | number:'1.2-2' }} <small>m/s²</small></div><p>√(X² + Y² + Z²)</p></ion-card-content></ion-card>
+  <ion-card><ion-card-header><ion-card-title>Movimientos bruscos</ion-card-title></ion-card-header><ion-card-content><div class="numero">{{ movimientos }}</div><p>Umbral: 15 m/s² · intervalo mínimo: 700 ms</p><ion-button fill="outline" expand="block" (click)="reiniciarContador()">Reiniciar contador</ion-button></ion-card-content></ion-card>
+  <ion-card><ion-card-header><ion-card-title>Reto: detectar inclinación</ion-card-title></ion-card-header><ion-card-content><ion-chip color="primary">{{ detectarInclinacion() }}</ion-chip><p>Comprueba los signos de los ejes en tu dispositivo y ajusta las condiciones.</p></ion-card-content></ion-card>
+  <p class="nota">Prueba recomendada: teléfono físico. La lectura depende de los sensores y permisos disponibles.</p>
 </ion-content>
